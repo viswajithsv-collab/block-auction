@@ -205,76 +205,76 @@ const SETS = [
     { id: "set1", name: "Set 1: Geometry", description: "Physical structure of the axon", items: [
         { id: "a", name: "a", description: "Axon radius" },
         { id: "b", name: "b", description: "Extracellular boundary radius" },
-        { id: "ri_eq", name: "rᵢ = ρᵢ/πa²", description: "Intracellular resistance per unit length" },
-        { id: "ro_eq", name: "rₒ = ρₒ/π(b²-a²)", description: "Extracellular resistance per unit length" }
+        { id: "ri_eq", name: "r<sub>i</sub> = ρ<sub>i</sub>/πa²", description: "Intracellular resistance per unit length" },
+        { id: "ro_eq", name: "r<sub>o</sub> = ρ<sub>o</sub>/π(b²−a²)", description: "Extracellular resistance per unit length" }
     ]},
     { id: "set2", name: "Set 2: Passive Membrane", description: "Resting membrane properties", items: [
-        { id: "gleak", name: "g_leak", description: "Leak conductance per unit length" },
-        { id: "Erest", name: "E_rest", description: "Resting membrane potential" },
-        { id: "Kleak", name: "K_leak = g_leak(Vₘ - E_rest)", description: "Leak current" }
+        { id: "gleak", name: "g<sub>leak</sub>", description: "Leak conductance per unit length" },
+        { id: "Erest", name: "E<sub>rest</sub>", description: "Resting membrane potential" },
+        { id: "Kleak", name: "K<sub>leak</sub> = g<sub>leak</sub>(V<sub>m</sub> − E<sub>rest</sub>)", description: "Leak current" }
     ]},
     { id: "set3", name: "Set 3: Synaptic Input", description: "Synapse properties", items: [
-        { id: "gsyn", name: "g_syn(t)", description: "Synaptic conductance" },
-        { id: "Esyn", name: "E_syn", description: "Synaptic reversal potential" },
-        { id: "Ksyn", name: "K_syn = g_syn(Vₘ - E_syn)", description: "Synaptic current" }
+        { id: "gsyn", name: "g<sub>syn</sub>(t)", description: "Synaptic conductance" },
+        { id: "Esyn", name: "E<sub>syn</sub>", description: "Synaptic reversal potential" },
+        { id: "Ksyn", name: "K<sub>syn</sub> = g<sub>syn</sub>(V<sub>m</sub> − E<sub>syn</sub>)", description: "Synaptic current" }
     ]},
     { id: "set4", name: "Set 4: Ion Reversal Potentials", description: "Nernst potentials", items: [
-        { id: "ENa", name: "E_Na", description: "Sodium reversal potential" },
-        { id: "EK", name: "E_K", description: "Potassium reversal potential" },
-        { id: "ECl", name: "E_Cl", description: "Chloride reversal potential" }
+        { id: "ENa", name: "E<sub>Na</sub>", description: "Sodium reversal potential" },
+        { id: "EK", name: "E<sub>K</sub>", description: "Potassium reversal potential" },
+        { id: "ECl", name: "E<sub>Cl</sub>", description: "Chloride reversal potential" }
     ]},
     { id: "set5", name: "Set 5: EPSP Specification", description: "What makes an EPSP", items: [
-        { id: "Esyn_epsp", name: "E_syn > E_rest", description: "EPSP reversal constraint" },
-        { id: "df_epsp", name: "(Vₘ - E_syn) < 0", description: "Driving force negative" },
-        { id: "Ksyn_epsp", name: "K_syn < 0", description: "Current inward (sink)" }
+        { id: "Esyn_epsp", name: "E<sub>syn</sub> > E<sub>rest</sub>", description: "EPSP reversal constraint" },
+        { id: "df_epsp", name: "(V<sub>m</sub> − E<sub>syn</sub>) < 0", description: "Driving force negative" },
+        { id: "Ksyn_epsp", name: "K<sub>syn</sub> < 0 (inward)", description: "Current inward (sink)" }
     ]},
     { id: "set6", name: "Set 6: IPSP Specification", description: "What makes an IPSP", items: [
-        { id: "Esyn_ipsp", name: "E_syn < E_rest", description: "IPSP reversal constraint" },
-        { id: "df_ipsp", name: "(Vₘ - E_syn) > 0", description: "Driving force positive" },
-        { id: "Ksyn_ipsp", name: "K_syn > 0", description: "Current outward (source)" }
+        { id: "Esyn_ipsp", name: "E<sub>syn</sub> < E<sub>rest</sub>", description: "IPSP reversal constraint" },
+        { id: "df_ipsp", name: "(V<sub>m</sub> − E<sub>syn</sub>) > 0", description: "Driving force positive" },
+        { id: "Ksyn_ipsp", name: "K<sub>syn</sub> > 0 (outward)", description: "Current outward (source)" }
     ]},
     { id: "set7", name: "Set 7: Total Membrane Current", description: "Combining currents", items: [
-        { id: "Km_total", name: "Kₘ = K_leak + K_syn", description: "Total membrane current" },
-        { id: "z0", name: "z₀", description: "Synapse location" }
+        { id: "Km_total", name: "K<sub>m</sub> = K<sub>leak</sub> + K<sub>syn</sub>", description: "Total membrane current" },
+        { id: "z0", name: "z<sub>0</sub>", description: "Synapse location" }
     ]},
     { id: "set8", name: "Set 8: Intracellular Domain", description: "Inside the axon", items: [
-        { id: "Ii", name: "Iᵢ", description: "Intracellular current" },
-        { id: "Vi", name: "Vᵢ", description: "Intracellular potential" },
-        { id: "dVi", name: "∂Vᵢ/∂z = -rᵢIᵢ", description: "Ohm's law inside" }
+        { id: "Ii", name: "I<sub>i</sub>", description: "Intracellular current" },
+        { id: "Vi", name: "V<sub>i</sub>", description: "Intracellular potential" },
+        { id: "dVi", name: "∂V<sub>i</sub>/∂z = −r<sub>i</sub>I<sub>i</sub>", description: "Ohm's law inside" }
     ]},
     { id: "set9", name: "Set 9: Extracellular Domain", description: "Outside the axon", items: [
-        { id: "Io", name: "Iₒ", description: "Extracellular current" },
-        { id: "Vo", name: "Vₒ", description: "Extracellular potential" },
-        { id: "dVo", name: "∂Vₒ/∂z = -rₒIₒ", description: "Ohm's law outside" }
+        { id: "Io", name: "I<sub>o</sub>", description: "Extracellular current" },
+        { id: "Vo", name: "V<sub>o</sub>", description: "Extracellular potential" },
+        { id: "dVo", name: "∂V<sub>o</sub>/∂z = −r<sub>o</sub>I<sub>o</sub>", description: "Ohm's law outside" }
     ]},
     { id: "set10", name: "Set 10: Current Conservation", description: "KCL constraints", items: [
-        { id: "dIi", name: "∂Iᵢ/∂z = -Kₘ", description: "Intracellular continuity" },
-        { id: "dIo", name: "∂Iₒ/∂z = Kₘ", description: "Extracellular continuity" }
+        { id: "dIi", name: "∂I<sub>i</sub>/∂z = −K<sub>m</sub>", description: "Intracellular continuity" },
+        { id: "dIo", name: "∂I<sub>o</sub>/∂z = K<sub>m</sub>", description: "Extracellular continuity" }
     ]},
     { id: "set11", name: "Set 11: Membrane Potential", description: "Voltage relationships", items: [
-        { id: "Vm_def", name: "Vₘ = Vᵢ - Vₒ", description: "Membrane potential definition" },
-        { id: "Vi_eq", name: "Vᵢ = Vₘ + Vₒ", description: "Intracellular relationship" }
+        { id: "Vm_def", name: "V<sub>m</sub> = V<sub>i</sub> − V<sub>o</sub>", description: "Membrane potential definition" },
+        { id: "Vi_eq", name: "V<sub>i</sub> = V<sub>m</sub> + V<sub>o</sub>", description: "Intracellular relationship" }
     ]},
     { id: "set12", name: "Set 12: Governing Equation", description: "Core conductor equation", items: [
-        { id: "gov_eq", name: "∂²Vₘ/∂z² = (rₒ+rᵢ)Kₘ", description: "Combined equation" }
+        { id: "gov_eq", name: "∂²V<sub>m</sub>/∂z² = (r<sub>o</sub>+r<sub>i</sub>)K<sub>m</sub>", description: "Combined equation" }
     ]},
     { id: "set13", name: "Set 13: Intracellular Recording", description: "What electrode sees", items: [
-        { id: "intra_elec", name: "Intracellular electrode", description: "Measures Vᵢ" },
-        { id: "epsp_intra", name: "EPSP: Vᵢ ↑", description: "Depolarization" },
-        { id: "ipsp_intra", name: "IPSP: Vᵢ ↓", description: "Hyperpolarization" }
+        { id: "intra_elec", name: "Intracellular electrode", description: "Measures V<sub>i</sub>" },
+        { id: "epsp_intra", name: "EPSP: V<sub>i</sub> ↑", description: "Depolarization" },
+        { id: "ipsp_intra", name: "IPSP: V<sub>i</sub> ↓", description: "Hyperpolarization" }
     ]},
     { id: "set14", name: "Set 14: Extracellular Recording", description: "What electrode sees", items: [
-        { id: "extra_elec", name: "Extracellular electrode", description: "Measures Vₒ" },
-        { id: "epsp_extra", name: "EPSP: Vₒ ↓", description: "Negative (sink)" },
-        { id: "ipsp_extra", name: "IPSP: Vₒ ↑", description: "Positive (source)" }
+        { id: "extra_elec", name: "Extracellular electrode", description: "Measures V<sub>o</sub>" },
+        { id: "epsp_extra", name: "EPSP: V<sub>o</sub> ↓", description: "Negative (sink)" },
+        { id: "ipsp_extra", name: "IPSP: V<sub>o</sub> ↑", description: "Positive (source)" }
     ]},
     { id: "set15", name: "Set 15: Key Constraints", description: "Critical constraints", items: [
-        { id: "ro_constraint", name: "rₒ > 0", description: "Required for extracellular signal" },
-        { id: "gsyn_constraint", name: "g_syn > 0", description: "Required for synaptic current" }
+        { id: "ro_constraint", name: "r<sub>o</sub> > 0", description: "Required for extracellular signal" },
+        { id: "gsyn_constraint", name: "g<sub>syn</sub> > 0", description: "Required for synaptic current" }
     ]},
     { id: "set16", name: "Set 16: Signal Polarity", description: "Key insight", items: [
-        { id: "polarity", name: "ΔVₒ opposite to ΔVₘ", description: "Opposite polarity" },
-        { id: "ro_magnitude", name: "|ΔVₒ| depends on rₒ", description: "Larger rₒ = larger signal" }
+        { id: "polarity", name: "ΔV<sub>o</sub> opposite to ΔV<sub>m</sub>", description: "Opposite polarity" },
+        { id: "ro_magnitude", name: "|ΔV<sub>o</sub>| depends on r<sub>o</sub>", description: "Larger r<sub>o</sub> = larger signal" }
     ]}
 ];
 

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Diagram Auction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e94560;
+        }
+
+        .header h1 {
+            color: #e94560;
+            font-size: 1.8em;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .team-name {
+            background: #e94560;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .budget-display {
+            font-size: 1.4em;
+        }
+
+        .budget-display span {
+            color: #4ecca3;
+            font-weight: bold;
+        }
+
+        .timer {
+            background: #e94560;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .timer.warning {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { background: #e94560; }
+            50% { background: #ff6b6b; }
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-screen h1 {
+            color: #e94560;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .login-screen input {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .login-screen button {
+            padding: 15px 50px;
+            font-size: 1.2em;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-screen button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .main-content.active {
+            display: block;
+        }
+
+        /* Sets Grid */
+        .sets-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .set-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .set-header {
+            background: rgba(233, 69, 96, 0.3);
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .set-header h3 {
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+
+        .set-header p {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .set-items {
+            padding: 10px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .item:hover {
+            border-color: #4ecca3;
+        }
+
+        .item.has-bid {
+            border-color: #4ecca3;
+            background: rgba(78, 204, 163, 0.1);
+        }
+
+        .item.outbid {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .item.winning {
+            border-color: #4ecca3;
+            background: rgba(78, 204, 163, 0.2);
+            box-shadow: 0 0 10px rgba(78, 204, 163, 0.3);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.1em;
+        }
+
+        .item-desc {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 3px;
+        }
+
+        .item-bidding {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .current-high {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .current-high .label {
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .current-high .value {
+            font-weight: bold;
+            color: #4ecca3;
+        }
+
+        .current-high .leader {
+            font-size: 0.7em;
+            color: #e94560;
+        }
+
+        .bid-input {
+            width: 70px;
+            padding: 8px;
+            border: 2px solid #4ecca3;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            text-align: center;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .bid-input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        /* Live Bids Panel */
+        .live-panel {
+            position: fixed;
+            right: 0;
+            top: 80px;
+            width: 280px;
+            height: calc(100vh - 80px);
+            background: rgba(0,0,0,0.8);
+            border-left: 2px solid #e94560;
+            padding: 20px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+        }
+
+        .live-panel.open {
+            transform: translateX(0);
+        }
+
+        .live-toggle {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            background: #e94560;
+            padding: 15px 10px;
+            border-radius: 10px 0 0 10px;
+            cursor: pointer;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        .live-panel h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e94560;
+            padding-bottom: 10px;
+        }
+
+        .live-bid-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+
+        .live-bid-item .team {
+            color: #4ecca3;
+            font-weight: bold;
+        }
+
+        .live-bid-item .amount {
+            color: #e94560;
+            float: right;
+        }
+
+        /* Frozen State */
+        .frozen .bid-input {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .frozen-banner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #e94560;
+            padding: 30px 60px;
+            border-radius: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            z-index: 1000;
+            animation: popIn 0.5s;
+        }
+
+        .frozen .frozen-banner {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Submit button */
+        .submit-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid #e94560;
+        }
+
+        .budget-bar {
+            flex: 1;
+            margin: 0 30px;
+        }
+
+        .budget-bar-inner {
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .budget-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecca3, #e94560);
+            transition: width 0.3s;
+        }
+
+        .budget-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .submit-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <h1>🎯 Block Diagram Auction</h1>
+        <p style="color: #aaa; margin-bottom: 20px;">Crayfish Axon EPSP/IPSP Model</p>
+        <input type="text" id="teamNameInput" placeholder="Enter Team Name">
+        <button onclick="joinAuction()">Join Auction</button>
+    </div>
+
+    <!-- Main Auction Interface -->
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <h1>🎯 Block Diagram Auction</h1>
+            <div class="header-info">
+                <div class="team-name" id="teamDisplay">Team Name</div>
+                <div class="budget-display">Budget: <span id="remainingBudget">100</span> / 100</div>
+                <div class="timer" id="timer">15:00</div>
+            </div>
+        </div>
+
+        <div class="sets-container" id="setsContainer">
+            <!-- Sets will be populated by JavaScript -->
+        </div>
+
+        <div class="submit-section">
+            <div style="color: #888;">Allocated:</div>
+            <div class="budget-bar">
+                <div class="budget-bar-inner">
+                    <div class="budget-bar-fill" id="budgetBar" style="width: 0%"></div>
+                </div>
+                <div class="budget-text"><span id="allocatedPoints">0</span> / 100 points allocated</div>
+            </div>
+            <button class="submit-btn" id="submitBtn" onclick="submitBids()">Update Bids</button>
+        </div>
+
+        <div class="frozen-banner">⏱️ AUCTION FROZEN!</div>
+    </div>
+
+    <!-- Live Bids Panel -->
+    <div class="live-toggle" onclick="toggleLivePanel()">LIVE BIDS</div>
+    <div class="live-panel" id="livePanel">
+        <h3>📊 Live Activity</h3>
+        <div id="liveFeed">
+            <!-- Live updates will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        
+        const TOTAL_BUDGET = 100;
+        const AUCTION_DURATION = 15 * 60; // 15 minutes in seconds
+        
+        // Google Apps Script Web App URL (you'll replace this)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyx_jTd1gpzRnMKoo3N338wr0vW1SFVOlkAGWRK50zJRJHF8rB7R6H8sDe2rB1l1ec/exec';
+
+        // Auction sets data
+        const AUCTION_SETS = [
+            {
+                id: "set1",
+                name: "Set 1: Geometry",
+                description: "Physical structure of the axon",
+                items: [
+                    { id: "a", name: "a", description: "Axon radius" },
+                    { id: "b", name: "b", description: "Extracellular boundary radius" },
+                    { id: "ri_eq", name: "rᵢ = ρᵢ/πa²", description: "Intracellular resistance per unit length" },
+                    { id: "ro_eq", name: "rₒ = ρₒ/π(b²-a²)", description: "Extracellular resistance per unit length" }
+                ]
+            },
+            {
+                id: "set2",
+                name: "Set 2: Passive Membrane",
+                description: "Resting membrane properties",
+                items: [
+                    { id: "gleak", name: "g_leak", description: "Leak conductance per unit length" },
+                    { id: "Erest", name: "E_rest", description: "Resting membrane potential" },
+                    { id: "Kleak", name: "K_leak = g_leak(Vₘ - E_rest)", description: "Leak current per unit length" }
+                ]
+            },
+            {
+                id: "set3",
+                name: "Set 3: Synaptic Input",
+                description: "Synapse properties",
+                items: [
+                    { id: "gsyn", name: "g_syn(t)", description: "Synaptic conductance (time-varying)" },
+                    { id: "Esyn", name: "E_syn", description: "Synaptic reversal potential" },
+                    { id: "Ksyn", name: "K_syn = g_syn(Vₘ - E_syn)", description: "Synaptic current per unit length" }
+                ]
+            },
+            {
+                id: "set4",
+                name: "Set 4: Ion Reversal Potentials",
+                description: "Nernst potentials for different ions",
+                items: [
+                    { id: "ENa", name: "E_Na", description: "Sodium reversal potential" },
+                    { id: "EK", name: "E_K", description: "Potassium reversal potential" },
+                    { id: "ECl", name: "E_Cl", description: "Chloride reversal potential" }
+                ]
+            },
+            {
+                id: "set5",
+                name: "Set 5: EPSP Specification",
+                description: "What makes an EPSP",
+                items: [
+                    { id: "Esyn_epsp", name: "E_syn > E_rest", description: "EPSP reversal potential constraint" },
+                    { id: "df_epsp", name: "(Vₘ - E_syn) < 0", description: "EPSP driving force is negative" },
+                    { id: "Ksyn_epsp", name: "K_syn < 0 (inward)", description: "EPSP current is inward (sink)" }
+                ]
+            },
+            {
+                id: "set6",
+                name: "Set 6: IPSP Specification",
+                description: "What makes an IPSP",
+                items: [
+                    { id: "Esyn_ipsp", name: "E_syn < E_rest", description: "IPSP reversal potential constraint" },
+                    { id: "df_ipsp", name: "(Vₘ - E_syn) > 0", description: "IPSP driving force is positive" },
+                    { id: "Ksyn_ipsp", name: "K_syn > 0 (outward)", description: "IPSP current is outward (source)" }
+                ]
+            },
+            {
+                id: "set7",
+                name: "Set 7: Total Membrane Current",
+                description: "Combining currents",
+                items: [
+                    { id: "Km_total", name: "Kₘ = K_leak + K_syn", description: "Total membrane current" },
+                    { id: "z0", name: "z₀", description: "Synapse location along axon" }
+                ]
+            },
+            {
+                id: "set8",
+                name: "Set 8: Intracellular Domain",
+                description: "Inside the axon",
+                items: [
+                    { id: "Ii", name: "Iᵢ", description: "Intracellular current" },
+                    { id: "Vi", name: "Vᵢ", description: "Intracellular potential" },
+                    { id: "dVi", name: "∂Vᵢ/∂z = -rᵢIᵢ", description: "Ohm's law inside" }
+                ]
+            },
+            {
+                id: "set9",
+                name: "Set 9: Extracellular Domain",
+                description: "Outside the axon",
+                items: [
+                    { id: "Io", name: "Iₒ", description: "Extracellular current" },
+                    { id: "Vo", name: "Vₒ", description: "Extracellular potential" },
+                    { id: "dVo", name: "∂Vₒ/∂z = -rₒIₒ", description: "Ohm's law outside" }
+                ]
+            },
+            {
+                id: "set10",
+                name: "Set 10: Current Conservation",
+                description: "KCL constraints",
+                items: [
+                    { id: "dIi", name: "∂Iᵢ/∂z = -Kₘ", description: "Intracellular current continuity" },
+                    { id: "dIo", name: "∂Iₒ/∂z = Kₘ", description: "Extracellular current continuity" }
+                ]
+            },
+            {
+                id: "set11",
+                name: "Set 11: Membrane Potential",
+                description: "Voltage relationships",
+                items: [
+                    { id: "Vm_def", name: "Vₘ = Vᵢ - Vₒ", description: "Membrane potential definition" },
+                    { id: "Vi_eq", name: "Vᵢ = Vₘ + Vₒ", description: "Intracellular potential relationship" }
+                ]
+            },
+            {
+                id: "set12",
+                name: "Set 12: Governing Equation",
+                description: "The core conductor equation",
+                items: [
+                    { id: "gov_eq", name: "∂²Vₘ/∂z² = (rₒ+rᵢ)Kₘ", description: "Combined governing equation" }
+                ]
+            },
+            {
+                id: "set13",
+                name: "Set 13: Intracellular Recording",
+                description: "What intracellular electrode sees",
+                items: [
+                    { id: "intra_elec", name: "Intracellular electrode", description: "Measures Vᵢ" },
+                    { id: "epsp_intra", name: "EPSP: Vᵢ ↑", description: "Depolarization (positive deflection)" },
+                    { id: "ipsp_intra", name: "IPSP: Vᵢ ↓", description: "Hyperpolarization (negative deflection)" }
+                ]
+            },
+            {
+                id: "set14",
+                name: "Set 14: Extracellular Recording",
+                description: "What extracellular electrode sees",
+                items: [
+                    { id: "extra_elec", name: "Extracellular electrode", description: "Measures Vₒ" },
+                    { id: "epsp_extra", name: "EPSP: Vₒ ↓", description: "Negative deflection (current sink)" },
+                    { id: "ipsp_extra", name: "IPSP: Vₒ ↑", description: "Positive deflection (current source)" }
+                ]
+            },
+            {
+                id: "set15",
+                name: "Set 15: Key Constraints",
+                description: "Critical constraints from Task 1",
+                items: [
+                    { id: "ro_constraint", name: "rₒ > 0", description: "Required to measure extracellular signal" },
+                    { id: "gsyn_constraint", name: "g_syn > 0", description: "Required for synaptic current" }
+                ]
+            },
+            {
+                id: "set16",
+                name: "Set 16: Signal Polarity",
+                description: "The key insight",
+                items: [
+                    { id: "polarity", name: "ΔVₒ opposite to ΔVₘ", description: "Extracellular is opposite polarity to membrane change" },
+                    { id: "ro_magnitude", name: "|ΔVₒ| depends on rₒ", description: "Larger rₒ gives larger extracellular signal" }
+                ]
+            }
+        ];
+
+        // ============================================
+        // STATE
+        // ============================================
+        
+        let teamName = '';
+        let bids = {}; // { itemId: bidAmount }
+        let allBids = {}; // All teams' bids from server
+        let timeRemaining = AUCTION_DURATION;
+        let isFrozen = false;
+        let timerInterval = null;
+        let pollInterval = null;
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function joinAuction() {
+            teamName = document.getElementById('teamNameInput').value.trim();
+            if (!teamName) {
+                alert('Please enter a team name');
+                return;
+            }
+            
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').classList.add('active');
+            document.getElementById('teamDisplay').textContent = teamName;
+            
+            renderSets();
+            startTimer();
+            startPolling();
+        }
+
+        function renderSets() {
+            const container = document.getElementById('setsContainer');
+            container.innerHTML = '';
+            
+            AUCTION_SETS.forEach(set => {
+                const setCard = document.createElement('div');
+                setCard.className = 'set-card';
+                setCard.innerHTML = `
+                    <div class="set-header">
+                        <h3>${set.name}</h3>
+                        <p>${set.description}</p>
+                    </div>
+                    <div class="set-items">
+                        ${set.items.map(item => `
+                            <div class="item" id="item-${item.id}">
+                                <div class="item-info">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-desc">${item.description}</div>
+                                </div>
+                                <div class="item-bidding">
+                                    <div class="current-high">
+                                        <div class="label">High bid</div>
+                                        <div class="value" id="high-${item.id}">0</div>
+                                        <div class="leader" id="leader-${item.id}">-</div>
+                                    </div>
+                                    <input type="number" 
+                                           class="bid-input" 
+                                           id="bid-${item.id}"
+                                           min="0" 
+                                           max="${TOTAL_BUDGET}"
+                                           value="0"
+                                           onchange="updateBid('${item.id}', this.value)"
+                                           onfocus="this.select()">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(setCard);
+            });
+        }
+
+        // ============================================
+        // BIDDING LOGIC
+        // ============================================
+
+        function updateBid(itemId, value) {
+            const newBid = parseInt(value) || 0;
+            bids[itemId] = newBid;
+            updateBudgetDisplay();
+            updateItemStatus(itemId);
+        }
+
+        function updateBudgetDisplay() {
+            let allocated = 0;
+            Object.values(bids).forEach(bid => allocated += bid);
+            
+            const remaining = TOTAL_BUDGET - allocated;
+            document.getElementById('remainingBudget').textContent = remaining;
+            document.getElementById('allocatedPoints').textContent = allocated;
+            document.getElementById('budgetBar').style.width = `${allocated}%`;
+            
+            // Disable submit if over budget
+            const submitBtn = document.getElementById('submitBtn');
+            if (remaining < 0) {
+                submitBtn.disabled = true;
+                document.getElementById('remainingBudget').style.color = '#ff6b6b';
+            } else {
+                submitBtn.disabled = false;
+                document.getElementById('remainingBudget').style.color = '#4ecca3';
+            }
+        }
+
+        function updateItemStatus(itemId) {
+            const item = document.getElementById(`item-${itemId}`);
+            const myBid = bids[itemId] || 0;
+            const highBid = getHighBid(itemId);
+            const leader = getLeader(itemId);
+            
+            item.classList.remove('has-bid', 'winning', 'outbid');
+            
+            if (myBid > 0) {
+                item.classList.add('has-bid');
+                if (leader === teamName) {
+                    item.classList.add('winning');
+                } else if (myBid <= highBid && highBid > 0) {
+                    item.classList.add('outbid');
+                }
+            }
+        }
+
+        function getHighBid(itemId) {
+            if (!allBids[itemId]) return 0;
+            return Math.max(...Object.values(allBids[itemId]), 0);
+        }
+
+        function getLeader(itemId) {
+            if (!allBids[itemId]) return '-';
+            let maxBid = 0;
+            let leader = '-';
+            Object.entries(allBids[itemId]).forEach(([team, bid]) => {
+                if (bid > maxBid) {
+                    maxBid = bid;
+                    leader = team;
+                }
+            });
+            return leader;
+        }
+
+        // ============================================
+        // SERVER COMMUNICATION
+        // ============================================
+
+        async function submitBids() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'submitBids',
+                        teamName: teamName,
+                        bids: bids
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    addToLiveFeed(`${teamName} updated bids`);
+                }
+            } catch (error) {
+                console.error('Error submitting bids:', error);
+                // For demo/offline mode, just update locally
+                addToLiveFeed(`${teamName} updated bids`);
+            }
+        }
+
+        async function fetchAllBids() {
+            try {
+                const response = await fetch(`${API_URL}?action=getAllBids`);
+                const data = await response.json();
+                allBids = data.bids || {};
+                updateAllDisplays();
+            } catch (error) {
+                console.error('Error fetching bids:', error);
+            }
+        }
+
+        function updateAllDisplays() {
+            AUCTION_SETS.forEach(set => {
+                set.items.forEach(item => {
+                    const highBid = getHighBid(item.id);
+                    const leader = getLeader(item.id);
+                    
+                    document.getElementById(`high-${item.id}`).textContent = highBid;
+                    document.getElementById(`leader-${item.id}`).textContent = leader;
+                    
+                    updateItemStatus(item.id);
+                });
+            });
+        }
+
+        function startPolling() {
+            // Poll every 3 seconds for updates
+            pollInterval = setInterval(fetchAllBids, 3000);
+        }
+
+        // ============================================
+        // TIMER
+        // ============================================
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    freezeAuction();
+                    return;
+                }
+                
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                // Warning when less than 2 minutes
+                if (timeRemaining < 120) {
+                    document.getElementById('timer').classList.add('warning');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function freezeAuction() {
+            isFrozen = true;
+            clearInterval(timerInterval);
+            clearInterval(pollInterval);
+            document.getElementById('mainContent').classList.add('frozen');
+            document.getElementById('timer').textContent = 'FROZEN';
+            
+            // Final submission
+            submitBids();
+        }
+
+        // ============================================
+        // LIVE FEED
+        // ============================================
+
+        function toggleLivePanel() {
+            document.getElementById('livePanel').classList.toggle('open');
+        }
+
+        function addToLiveFeed(message) {
+            const feed = document.getElementById('liveFeed');
+            const item = document.createElement('div');
+            item.className = 'live-bid-item';
+            item.innerHTML = `<span class="time">${new Date().toLocaleTimeString()}</span> ${message}`;
+            feed.insertBefore(item, feed.firstChild);
+            
+            // Keep only last 20 items
+            while (feed.children.length > 20) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none') {
+                joinAuction();
+            }
+        });
+    </script>
+</body>
+</html>

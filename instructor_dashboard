@@ -447,7 +447,7 @@
         // CONFIGURATION
         // ============================================
         
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyx_jTd1gpzRnMKoo3N338wr0vW1SFVOlkAGWRK50zJRJHF8rB7R6H8sDe2rB1l1ec/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzjZ6Cimdxf-CwfR4oW4ZIIfzgFfWavKV9bKDzv3P_nREJZBXyenZgnAL043agGZus/exec';
         const AUCTION_DURATION = 15 * 60;
 
         // Same auction sets as student view

@@ -111,7 +111,7 @@
         .tab-content.active { display: block; }
         .winners-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
         }
         .winner-card {
@@ -119,6 +119,13 @@
             border: 2px solid #4ecca3;
             border-radius: 10px;
             padding: 15px;
+            align-self: start;
+        }
+        @media (max-width: 1200px) {
+            .winners-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 900px) {
+            .winners-grid { grid-template-columns: repeat(2, 1fr); }
         }
         .winner-card h4 { color: #4ecca3; margin-bottom: 10px; }
         .winner-item { margin: 8px 0; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px; }

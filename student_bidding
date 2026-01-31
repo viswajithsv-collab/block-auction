@@ -763,32 +763,41 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    redirect: 'follow',
                     body: JSON.stringify({
                         action: 'submitBids',
                         teamName: teamName,
                         bids: bids
                     })
                 });
-                const result = await response.json();
+                const text = await response.text();
+                const result = JSON.parse(text);
                 if (result.success) {
                     addToLiveFeed(`${teamName} updated bids`);
                 }
+                console.log('Bids submitted:', result);
             } catch (error) {
                 console.error('Error submitting bids:', error);
                 // For demo/offline mode, just update locally
-                addToLiveFeed(`${teamName} updated bids`);
+                addToLiveFeed(`${teamName} updated bids (offline)`);
             }
         }
 
         async function fetchAllBids() {
             try {
-                const response = await fetch(`${API_URL}?action=getAllBids`);
-                const data = await response.json();
+                // Use fetch with redirect follow for Google Apps Script
+                const response = await fetch(`${API_URL}?action=getAllBids`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                const text = await response.text();
+                const data = JSON.parse(text);
                 allBids = data.bids || {};
                 updateAllDisplays();
+                console.log('Bids fetched successfully:', allBids);
             } catch (error) {
                 console.error('Error fetching bids:', error);
+                // Demo mode - keep going with empty/existing data
             }
         }
 

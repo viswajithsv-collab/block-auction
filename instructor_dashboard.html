@@ -187,22 +187,22 @@ const API = 'https://script.google.com/macros/s/AKfycbwbMIZyLuPD4kIDN0XJXfr4B1UD
 const DURATION = 15 * 60;
 
 const SETS = [
-    { id: "set1", name: "Set 1: Geometry", items: [{id:"a",name:"a"},{id:"b",name:"b"},{id:"ri_eq",name:"rᵢ"},{id:"ro_eq",name:"rₒ"}]},
-    { id: "set2", name: "Set 2: Passive Membrane", items: [{id:"gleak",name:"g_leak"},{id:"Erest",name:"E_rest"},{id:"Kleak",name:"K_leak"}]},
-    { id: "set3", name: "Set 3: Synaptic Input", items: [{id:"gsyn",name:"g_syn"},{id:"Esyn",name:"E_syn"},{id:"Ksyn",name:"K_syn"}]},
-    { id: "set4", name: "Set 4: Ion Potentials", items: [{id:"ENa",name:"E_Na"},{id:"EK",name:"E_K"},{id:"ECl",name:"E_Cl"}]},
-    { id: "set5", name: "Set 5: EPSP", items: [{id:"Esyn_epsp",name:"E_syn>E_rest"},{id:"df_epsp",name:"DF<0"},{id:"Ksyn_epsp",name:"K_syn<0"}]},
-    { id: "set6", name: "Set 6: IPSP", items: [{id:"Esyn_ipsp",name:"E_syn<E_rest"},{id:"df_ipsp",name:"DF>0"},{id:"Ksyn_ipsp",name:"K_syn>0"}]},
-    { id: "set7", name: "Set 7: Membrane Current", items: [{id:"Km_total",name:"Kₘ"},{id:"z0",name:"z₀"}]},
-    { id: "set8", name: "Set 8: Intracellular", items: [{id:"Ii",name:"Iᵢ"},{id:"Vi",name:"Vᵢ"},{id:"dVi",name:"∂Vᵢ/∂z"}]},
-    { id: "set9", name: "Set 9: Extracellular", items: [{id:"Io",name:"Iₒ"},{id:"Vo",name:"Vₒ"},{id:"dVo",name:"∂Vₒ/∂z"}]},
-    { id: "set10", name: "Set 10: Conservation", items: [{id:"dIi",name:"∂Iᵢ/∂z"},{id:"dIo",name:"∂Iₒ/∂z"}]},
-    { id: "set11", name: "Set 11: Membrane Potential", items: [{id:"Vm_def",name:"Vₘ=Vᵢ-Vₒ"},{id:"Vi_eq",name:"Vᵢ=Vₘ+Vₒ"}]},
-    { id: "set12", name: "Set 12: Governing Eq", items: [{id:"gov_eq",name:"∂²Vₘ/∂z²"}]},
-    { id: "set13", name: "Set 13: Intra Recording", items: [{id:"intra_elec",name:"Intra elec"},{id:"epsp_intra",name:"EPSP↑"},{id:"ipsp_intra",name:"IPSP↓"}]},
-    { id: "set14", name: "Set 14: Extra Recording", items: [{id:"extra_elec",name:"Extra elec"},{id:"epsp_extra",name:"EPSP↓"},{id:"ipsp_extra",name:"IPSP↑"}]},
-    { id: "set15", name: "Set 15: Constraints", items: [{id:"ro_constraint",name:"rₒ>0"},{id:"gsyn_constraint",name:"g_syn>0"}]},
-    { id: "set16", name: "Set 16: Polarity", items: [{id:"polarity",name:"ΔVₒ opp"},{id:"ro_magnitude",name:"|ΔVₒ|~rₒ"}]}
+    { id: "set1", name: "Set 1: Geometry", items: [{id:"a",name:"a"},{id:"b",name:"b"},{id:"ri_eq",name:"r<sub>i</sub> = ρ<sub>i</sub>/πa²"},{id:"ro_eq",name:"r<sub>o</sub> = ρ<sub>o</sub>/π(b²−a²)"}]},
+    { id: "set2", name: "Set 2: Passive Membrane", items: [{id:"gleak",name:"g<sub>leak</sub>"},{id:"Erest",name:"E<sub>rest</sub>"},{id:"Kleak",name:"K<sub>leak</sub>"}]},
+    { id: "set3", name: "Set 3: Synaptic Input", items: [{id:"gsyn",name:"g<sub>syn</sub>(t)"},{id:"Esyn",name:"E<sub>syn</sub>"},{id:"Ksyn",name:"K<sub>syn</sub>"}]},
+    { id: "set4", name: "Set 4: Ion Potentials", items: [{id:"ENa",name:"E<sub>Na</sub>"},{id:"EK",name:"E<sub>K</sub>"},{id:"ECl",name:"E<sub>Cl</sub>"}]},
+    { id: "set5", name: "Set 5: EPSP", items: [{id:"Esyn_epsp",name:"E<sub>syn</sub> > E<sub>rest</sub>"},{id:"df_epsp",name:"(V<sub>m</sub> − E<sub>syn</sub>) < 0"},{id:"Ksyn_epsp",name:"K<sub>syn</sub> < 0 (inward)"}]},
+    { id: "set6", name: "Set 6: IPSP", items: [{id:"Esyn_ipsp",name:"E<sub>syn</sub> < E<sub>rest</sub>"},{id:"df_ipsp",name:"(V<sub>m</sub> − E<sub>syn</sub>) > 0"},{id:"Ksyn_ipsp",name:"K<sub>syn</sub> > 0 (outward)"}]},
+    { id: "set7", name: "Set 7: Membrane Current", items: [{id:"Km_total",name:"K<sub>m</sub> = K<sub>leak</sub> + K<sub>syn</sub>"},{id:"z0",name:"z<sub>0</sub>"}]},
+    { id: "set8", name: "Set 8: Intracellular", items: [{id:"Ii",name:"I<sub>i</sub>"},{id:"Vi",name:"V<sub>i</sub>"},{id:"dVi",name:"∂V<sub>i</sub>/∂z = −r<sub>i</sub>I<sub>i</sub>"}]},
+    { id: "set9", name: "Set 9: Extracellular", items: [{id:"Io",name:"I<sub>o</sub>"},{id:"Vo",name:"V<sub>o</sub>"},{id:"dVo",name:"∂V<sub>o</sub>/∂z = −r<sub>o</sub>I<sub>o</sub>"}]},
+    { id: "set10", name: "Set 10: Conservation", items: [{id:"dIi",name:"∂I<sub>i</sub>/∂z = −K<sub>m</sub>"},{id:"dIo",name:"∂I<sub>o</sub>/∂z = K<sub>m</sub>"}]},
+    { id: "set11", name: "Set 11: Membrane Potential", items: [{id:"Vm_def",name:"V<sub>m</sub> = V<sub>i</sub> − V<sub>o</sub>"},{id:"Vi_eq",name:"V<sub>i</sub> = V<sub>m</sub> + V<sub>o</sub>"}]},
+    { id: "set12", name: "Set 12: Governing Eq", items: [{id:"gov_eq",name:"∂²V<sub>m</sub>/∂z² = (r<sub>o</sub>+r<sub>i</sub>)K<sub>m</sub>"}]},
+    { id: "set13", name: "Set 13: Intra Recording", items: [{id:"intra_elec",name:"Intracellular electrode"},{id:"epsp_intra",name:"EPSP: V<sub>i</sub> ↑"},{id:"ipsp_intra",name:"IPSP: V<sub>i</sub> ↓"}]},
+    { id: "set14", name: "Set 14: Extra Recording", items: [{id:"extra_elec",name:"Extracellular electrode"},{id:"epsp_extra",name:"EPSP: V<sub>o</sub> ↓"},{id:"ipsp_extra",name:"IPSP: V<sub>o</sub> ↑"}]},
+    { id: "set15", name: "Set 15: Constraints", items: [{id:"ro_constraint",name:"r<sub>o</sub> > 0"},{id:"gsyn_constraint",name:"g<sub>syn</sub> > 0"}]},
+    { id: "set16", name: "Set 16: Polarity", items: [{id:"polarity",name:"ΔV<sub>o</sub> opposite to ΔV<sub>m</sub>"},{id:"ro_magnitude",name:"|ΔV<sub>o</sub>| depends on r<sub>o</sub>"}]}
 ];
 
 let allBids = {};

@@ -454,7 +454,7 @@
         const AUCTION_DURATION = 15 * 60; // 15 minutes in seconds
         
         // Google Apps Script Web App URL (you'll replace this)
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyx_jTd1gpzRnMKoo3N338wr0vW1SFVOlkAGWRK50zJRJHF8rB7R6H8sDe2rB1l1ec/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzjZ6Cimdxf-CwfR4oW4ZIIfzgFfWavKV9bKDzv3P_nREJZBXyenZgnAL043agGZus/exec';
 
         // Auction sets data
         const AUCTION_SETS = [

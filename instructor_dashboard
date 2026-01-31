@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction Dashboard - Instructor View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e94560;
+        }
+
+        .header h1 {
+            color: #e94560;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-start {
+            background: #4ecca3;
+            color: #1a1a2e;
+        }
+
+        .btn-freeze {
+            background: #e94560;
+            color: white;
+        }
+
+        .btn-reset {
+            background: #666;
+            color: white;
+        }
+
+        .timer-display {
+            font-size: 2.5em;
+            font-family: monospace;
+            color: #4ecca3;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 30px;
+            border-radius: 10px;
+        }
+
+        .timer-display.warning {
+            color: #e94560;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Dashboard Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .panel h2 {
+            color: #e94560;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Most Wanted Items */
+        .wanted-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .wanted-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border-left: 4px solid #4ecca3;
+        }
+
+        .wanted-item .rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e94560;
+            width: 40px;
+        }
+
+        .wanted-item .info {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .wanted-item .name {
+            font-weight: bold;
+        }
+
+        .wanted-item .teams {
+            font-size: 0.85em;
+            color: #888;
+        }
+
+        .wanted-item .total {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+
+        .bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecca3, #e94560);
+            border-radius: 3px;
+        }
+
+        /* Team Summary */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .team-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .team-card h3 {
+            color: #4ecca3;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .team-card .stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .team-card .stat .label {
+            color: #888;
+        }
+
+        .team-card .top-bids {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85em;
+        }
+
+        .team-card .top-bids div {
+            margin: 3px 0;
+            color: #aaa;
+        }
+
+        /* Items by Set */
+        .set-summary {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .set-summary h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+
+        .set-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .set-item {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .set-item .item-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .set-item .high-bid {
+            color: #4ecca3;
+            font-size: 1.2em;
+        }
+
+        .set-item .leader {
+            color: #e94560;
+            font-size: 0.85em;
+        }
+
+        /* Live Feed */
+        .live-feed {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .feed-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            font-size: 0.9em;
+            border-left: 3px solid #4ecca3;
+        }
+
+        .feed-item .time {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .feed-item .team {
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        /* Winners Panel */
+        .winners-panel {
+            display: none;
+            grid-column: 1 / -1;
+        }
+
+        .winners-panel.active {
+            display: block;
+        }
+
+        .winners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .winner-card {
+            background: rgba(78, 204, 163, 0.1);
+            border: 2px solid #4ecca3;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .winner-card h4 {
+            color: #4ecca3;
+            margin-bottom: 10px;
+        }
+
+        .winner-card .winner-team {
+            color: #e94560;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .winner-card .winning-bid {
+            color: #fff;
+        }
+
+        /* Full screen toggle */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 25px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #e94560;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Auction Dashboard</h1>
+        <div class="timer-display" id="timer">15:00</div>
+        <div class="controls">
+            <button class="btn btn-start" onclick="startAuction()">▶ Start</button>
+            <button class="btn btn-freeze" onclick="freezeAuction()">⏹ Freeze</button>
+            <button class="btn btn-reset" onclick="resetAuction()">↺ Reset</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('live')">📊 Live View</button>
+        <button class="tab" onclick="showTab('teams')">👥 Teams</button>
+        <button class="tab" onclick="showTab('items')">📦 Items</button>
+        <button class="tab" onclick="showTab('winners')">🏆 Winners</button>
+    </div>
+
+    <!-- Live View Tab -->
+    <div class="tab-content active" id="tab-live">
+        <div class="dashboard">
+            <div class="panel">
+                <h2>🔥 Most Wanted Items</h2>
+                <div class="wanted-list" id="mostWanted">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>❄️ Least Wanted Items</h2>
+                <div class="wanted-list" id="leastWanted">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📡 Live Activity</h2>
+                <div class="live-feed" id="liveFeed">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📈 Bidding Wars</h2>
+                <div id="biddingWars">
+                    <!-- Items with multiple high bids -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teams Tab -->
+    <div class="tab-content" id="tab-teams">
+        <div class="panel">
+            <h2>👥 Team Summary</h2>
+            <div class="team-grid" id="teamGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Tab -->
+    <div class="tab-content" id="tab-items">
+        <div class="panel">
+            <h2>📦 Items by Set</h2>
+            <div id="itemsBySet">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Winners Tab -->
+    <div class="tab-content" id="tab-winners">
+        <div class="panel winners-panel active">
+            <h2>🏆 Auction Results</h2>
+            <div class="winners-grid" id="winnersGrid">
+                <!-- Populated after freeze -->
+            </div>
+        </div>
+    </div>
+
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyx_jTd1gpzRnMKoo3N338wr0vW1SFVOlkAGWRK50zJRJHF8rB7R6H8sDe2rB1l1ec/exec';
+        const AUCTION_DURATION = 15 * 60;
+
+        // Same auction sets as student view
+        const AUCTION_SETS = [
+            {
+                id: "set1", name: "Set 1: Geometry",
+                items: [
+                    { id: "a", name: "a" },
+                    { id: "b", name: "b" },
+                    { id: "ri_eq", name: "rᵢ = ρᵢ/πa²" },
+                    { id: "ro_eq", name: "rₒ = ρₒ/π(b²-a²)" }
+                ]
+            },
+            {
+                id: "set2", name: "Set 2: Passive Membrane",
+                items: [
+                    { id: "gleak", name: "g_leak" },
+                    { id: "Erest", name: "E_rest" },
+                    { id: "Kleak", name: "K_leak" }
+                ]
+            },
+            {
+                id: "set3", name: "Set 3: Synaptic Input",
+                items: [
+                    { id: "gsyn", name: "g_syn(t)" },
+                    { id: "Esyn", name: "E_syn" },
+                    { id: "Ksyn", name: "K_syn" }
+                ]
+            },
+            {
+                id: "set4", name: "Set 4: Ion Reversal Potentials",
+                items: [
+                    { id: "ENa", name: "E_Na" },
+                    { id: "EK", name: "E_K" },
+                    { id: "ECl", name: "E_Cl" }
+                ]
+            },
+            {
+                id: "set5", name: "Set 5: EPSP Specification",
+                items: [
+                    { id: "Esyn_epsp", name: "E_syn > E_rest" },
+                    { id: "df_epsp", name: "(Vₘ - E_syn) < 0" },
+                    { id: "Ksyn_epsp", name: "K_syn < 0" }
+                ]
+            },
+            {
+                id: "set6", name: "Set 6: IPSP Specification",
+                items: [
+                    { id: "Esyn_ipsp", name: "E_syn < E_rest" },
+                    { id: "df_ipsp", name: "(Vₘ - E_syn) > 0" },
+                    { id: "Ksyn_ipsp", name: "K_syn > 0" }
+                ]
+            },
+            {
+                id: "set7", name: "Set 7: Total Membrane Current",
+                items: [
+                    { id: "Km_total", name: "Kₘ = K_leak + K_syn" },
+                    { id: "z0", name: "z₀" }
+                ]
+            },
+            {
+                id: "set8", name: "Set 8: Intracellular Domain",
+                items: [
+                    { id: "Ii", name: "Iᵢ" },
+                    { id: "Vi", name: "Vᵢ" },
+                    { id: "dVi", name: "∂Vᵢ/∂z = -rᵢIᵢ" }
+                ]
+            },
+            {
+                id: "set9", name: "Set 9: Extracellular Domain",
+                items: [
+                    { id: "Io", name: "Iₒ" },
+                    { id: "Vo", name: "Vₒ" },
+                    { id: "dVo", name: "∂Vₒ/∂z = -rₒIₒ" }
+                ]
+            },
+            {
+                id: "set10", name: "Set 10: Current Conservation",
+                items: [
+                    { id: "dIi", name: "∂Iᵢ/∂z = -Kₘ" },
+                    { id: "dIo", name: "∂Iₒ/∂z = Kₘ" }
+                ]
+            },
+            {
+                id: "set11", name: "Set 11: Membrane Potential",
+                items: [
+                    { id: "Vm_def", name: "Vₘ = Vᵢ - Vₒ" },
+                    { id: "Vi_eq", name: "Vᵢ = Vₘ + Vₒ" }
+                ]
+            },
+            {
+                id: "set12", name: "Set 12: Governing Equation",
+                items: [
+                    { id: "gov_eq", name: "∂²Vₘ/∂z² = (rₒ+rᵢ)Kₘ" }
+                ]
+            },
+            {
+                id: "set13", name: "Set 13: Intracellular Recording",
+                items: [
+                    { id: "intra_elec", name: "Intracellular electrode" },
+                    { id: "epsp_intra", name: "EPSP: Vᵢ ↑" },
+                    { id: "ipsp_intra", name: "IPSP: Vᵢ ↓" }
+                ]
+            },
+            {
+                id: "set14", name: "Set 14: Extracellular Recording",
+                items: [
+                    { id: "extra_elec", name: "Extracellular electrode" },
+                    { id: "epsp_extra", name: "EPSP: Vₒ ↓" },
+                    { id: "ipsp_extra", name: "IPSP: Vₒ ↑" }
+                ]
+            },
+            {
+                id: "set15", name: "Set 15: Key Constraints",
+                items: [
+                    { id: "ro_constraint", name: "rₒ > 0" },
+                    { id: "gsyn_constraint", name: "g_syn > 0" }
+                ]
+            },
+            {
+                id: "set16", name: "Set 16: Signal Polarity",
+                items: [
+                    { id: "polarity", name: "ΔVₒ opposite to ΔVₘ" },
+                    { id: "ro_magnitude", name: "|ΔVₒ| depends on rₒ" }
+                ]
+            }
+        ];
+
+        // ============================================
+        // STATE
+        // ============================================
+
+        let allBids = {};
+        let timeRemaining = AUCTION_DURATION;
+        let timerInterval = null;
+        let pollInterval = null;
+        let isFrozen = false;
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function init() {
+            renderItemsBySet();
+            startPolling();
+        }
+
+        // ============================================
+        // TABS
+        // ============================================
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // ============================================
+        // TIMER CONTROLS
+        // ============================================
+
+        function startAuction() {
+            if (timerInterval) return;
+            
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    freezeAuction();
+                    return;
+                }
+                timeRemaining--;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function freezeAuction() {
+            isFrozen = true;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('timer').textContent = 'FROZEN';
+            document.getElementById('timer').classList.add('warning');
+            
+            // Show winners tab
+            showTab('winners');
+            renderWinners();
+        }
+
+        function resetAuction() {
+            if (!confirm('Reset the auction? This will clear all bids.')) return;
+            
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timeRemaining = AUCTION_DURATION;
+            isFrozen = false;
+            allBids = {};
+            
+            updateTimerDisplay();
+            document.getElementById('timer').classList.remove('warning');
+            updateAllDisplays();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining < 120) {
+                document.getElementById('timer').classList.add('warning');
+            }
+        }
+
+        // ============================================
+        // DATA FETCHING
+        // ============================================
+
+        async function fetchAllBids() {
+            try {
+                const response = await fetch(`${API_URL}?action=getAllBids`);
+                const data = await response.json();
+                allBids = data.bids || {};
+                updateAllDisplays();
+            } catch (error) {
+                console.error('Error fetching bids:', error);
+                // Demo mode - generate fake data
+                generateDemoData();
+                updateAllDisplays();
+            }
+        }
+
+        function startPolling() {
+            fetchAllBids();
+            pollInterval = setInterval(fetchAllBids, 2000);
+        }
+
+        function generateDemoData() {
+            // Demo data for testing without backend
+            const teams = ['Team Alpha', 'Team Beta', 'Team Gamma', 'Team Delta', 'Team Epsilon'];
+            const items = [];
+            AUCTION_SETS.forEach(set => set.items.forEach(item => items.push(item.id)));
+            
+            items.forEach(itemId => {
+                allBids[itemId] = {};
+                teams.forEach(team => {
+                    if (Math.random() > 0.5) {
+                        allBids[itemId][team] = Math.floor(Math.random() * 20);
+                    }
+                });
+            });
+        }
+
+        // ============================================
+        // DISPLAY UPDATES
+        // ============================================
+
+        function updateAllDisplays() {
+            renderMostWanted();
+            renderLeastWanted();
+            renderTeamGrid();
+            renderItemsBySet();
+            renderBiddingWars();
+        }
+
+        function renderMostWanted() {
+            const container = document.getElementById('mostWanted');
+            const itemTotals = getItemTotals();
+            const sorted = itemTotals.sort((a, b) => b.total - a.total).slice(0, 10);
+            const maxTotal = sorted[0]?.total || 1;
+
+            container.innerHTML = sorted.map((item, index) => `
+                <div class="wanted-item">
+                    <div class="rank">#${index + 1}</div>
+                    <div class="info">
+                        <div class="name">${item.name}</div>
+                        <div class="teams">${item.bidCount} teams bidding</div>
+                        <div class="bar"><div class="bar-fill" style="width: ${(item.total / maxTotal) * 100}%"></div></div>
+                    </div>
+                    <div class="total">${item.total}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderLeastWanted() {
+            const container = document.getElementById('leastWanted');
+            const itemTotals = getItemTotals();
+            const sorted = itemTotals.sort((a, b) => a.total - b.total).slice(0, 10);
+            const maxTotal = Math.max(...itemTotals.map(i => i.total)) || 1;
+
+            container.innerHTML = sorted.map((item, index) => `
+                <div class="wanted-item">
+                    <div class="rank">#${index + 1}</div>
+                    <div class="info">
+                        <div class="name">${item.name}</div>
+                        <div class="teams">${item.bidCount} teams bidding</div>
+                        <div class="bar"><div class="bar-fill" style="width: ${(item.total / maxTotal) * 100}%"></div></div>
+                    </div>
+                    <div class="total">${item.total}</div>
+                </div>
+            `).join('');
+        }
+
+        function getItemTotals() {
+            const totals = [];
+            AUCTION_SETS.forEach(set => {
+                set.items.forEach(item => {
+                    const bids = allBids[item.id] || {};
+                    const total = Object.values(bids).reduce((sum, bid) => sum + bid, 0);
+                    const bidCount = Object.values(bids).filter(b => b > 0).length;
+                    totals.push({ id: item.id, name: item.name, total, bidCount });
+                });
+            });
+            return totals;
+        }
+
+        function renderTeamGrid() {
+            const container = document.getElementById('teamGrid');
+            const teamData = getTeamData();
+
+            container.innerHTML = Object.entries(teamData).map(([team, data]) => `
+                <div class="team-card">
+                    <h3>${team}</h3>
+                    <div class="stat">
+                        <span class="label">Total Allocated:</span>
+                        <span>${data.totalSpent}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Items Bid On:</span>
+                        <span>${data.itemCount}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Currently Winning:</span>
+                        <span>${data.winning}</span>
+                    </div>
+                    <div class="top-bids">
+                        <strong>Top bids:</strong>
+                        ${data.topBids.map(b => `<div>${b.name}: ${b.amount}</div>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getTeamData() {
+            const teams = {};
+            
+            // Collect all team bids
+            Object.entries(allBids).forEach(([itemId, bids]) => {
+                Object.entries(bids).forEach(([team, amount]) => {
+                    if (!teams[team]) {
+                        teams[team] = { totalSpent: 0, itemCount: 0, bids: [], winning: 0 };
+                    }
+                    if (amount > 0) {
+                        teams[team].totalSpent += amount;
+                        teams[team].itemCount++;
+                        const itemName = getItemName(itemId);
+                        teams[team].bids.push({ id: itemId, name: itemName, amount });
+                    }
+                });
+            });
+
+            // Calculate winning items
+            Object.entries(allBids).forEach(([itemId, bids]) => {
+                const winner = getWinner(itemId);
+                if (winner && teams[winner]) {
+                    teams[winner].winning++;
+                }
+            });
+
+            // Get top 3 bids per team
+            Object.keys(teams).forEach(team => {
+                teams[team].topBids = teams[team].bids
+                    .sort((a, b) => b.amount - a.amount)
+                    .slice(0, 3);
+            });
+
+            return teams;
+        }
+
+        function getItemName(itemId) {
+            for (const set of AUCTION_SETS) {
+                for (const item of set.items) {
+                    if (item.id === itemId) return item.name;
+                }
+            }
+            return itemId;
+        }
+
+        function getWinner(itemId) {
+            const bids = allBids[itemId] || {};
+            let maxBid = 0;
+            let winner = null;
+            Object.entries(bids).forEach(([team, amount]) => {
+                if (amount > maxBid) {
+                    maxBid = amount;
+                    winner = team;
+                }
+            });
+            return winner;
+        }
+
+        function renderItemsBySet() {
+            const container = document.getElementById('itemsBySet');
+            
+            container.innerHTML = AUCTION_SETS.map(set => `
+                <div class="set-summary">
+                    <h3>${set.name}</h3>
+                    <div class="set-items-grid">
+                        ${set.items.map(item => {
+                            const bids = allBids[item.id] || {};
+                            const highBid = Math.max(...Object.values(bids), 0);
+                            const leader = getWinner(item.id) || '-';
+                            return `
+                                <div class="set-item">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="high-bid">${highBid}</div>
+                                    <div class="leader">${leader}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderBiddingWars() {
+            const container = document.getElementById('biddingWars');
+            const wars = [];
+
+            Object.entries(allBids).forEach(([itemId, bids]) => {
+                const bidValues = Object.entries(bids).filter(([t, b]) => b > 0);
+                if (bidValues.length >= 2) {
+                    const sorted = bidValues.sort((a, b) => b[1] - a[1]);
+                    const diff = sorted[0][1] - sorted[1][1];
+                    if (diff <= 5) { // Close race
+                        wars.push({
+                            id: itemId,
+                            name: getItemName(itemId),
+                            leader: sorted[0][0],
+                            leaderBid: sorted[0][1],
+                            challenger: sorted[1][0],
+                            challengerBid: sorted[1][1]
+                        });
+                    }
+                }
+            });
+
+            container.innerHTML = wars.length > 0 ? wars.map(war => `
+                <div class="wanted-item">
+                    <div class="info">
+                        <div class="name">${war.name}</div>
+                        <div class="teams">
+                            <span style="color:#4ecca3">${war.leader}: ${war.leaderBid}</span> vs 
+                            <span style="color:#e94560">${war.challenger}: ${war.challengerBid}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<p style="color:#666">No close races yet...</p>';
+        }
+
+        function renderWinners() {
+            const container = document.getElementById('winnersGrid');
+            
+            container.innerHTML = AUCTION_SETS.map(set => `
+                <div class="winner-card">
+                    <h4>${set.name}</h4>
+                    ${set.items.map(item => {
+                        const winner = getWinner(item.id);
+                        const bids = allBids[item.id] || {};
+                        const winningBid = winner ? bids[winner] : 0;
+                        return `
+                            <div style="margin: 8px 0; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px;">
+                                <div style="color:#888">${item.name}</div>
+                                <div class="winner-team">${winner || 'No bids'}</div>
+                                ${winner ? `<div class="winning-bid">${winningBid} points</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

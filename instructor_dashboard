@@ -667,10 +667,15 @@
 
         async function fetchAllBids() {
             try {
-                const response = await fetch(`${API_URL}?action=getAllBids`);
-                const data = await response.json();
+                const response = await fetch(`${API_URL}?action=getAllBids`, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                const text = await response.text();
+                const data = JSON.parse(text);
                 allBids = data.bids || {};
                 updateAllDisplays();
+                console.log('Bids fetched:', Object.keys(allBids).length, 'items');
             } catch (error) {
                 console.error('Error fetching bids:', error);
                 // Demo mode - generate fake data

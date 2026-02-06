@@ -8,275 +8,153 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
             min-height: 100vh;
-            color: #e0e0e0;
-        }
-        .header {
-            background: rgba(0,0,0,0.4);
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #e94560;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-        .header h1 { color: #e94560; font-size: 1.4em; }
-        .header-info { display: flex; gap: 20px; align-items: center; }
-        .team-badge {
-            background: #e94560;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-        .budget-display { font-size: 1.1em; }
-        .budget-display .amount { font-weight: bold; font-size: 1.3em; }
-        .budget-display .amount.ok { color: #4ecca3; }
-        .budget-display .amount.warn { color: #ffc107; }
-        .budget-display .amount.over { color: #ff4444; }
-        .timer {
-            background: #e94560;
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-size: 1.3em;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            min-width: 80px;
-            text-align: center;
-        }
-        .timer.warning { animation: pulse 1s infinite; }
-        .timer.expired { background: #666; }
-        @keyframes pulse { 0%,100% { background: #e94560; } 50% { background: #ff2244; } }
-
-        .login-screen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .login-screen h1 { color: #e94560; font-size: 2.2em; margin-bottom: 10px; }
-        .login-screen p { color: #aaa; margin-bottom: 20px; font-size: 1.1em; }
-        .login-screen input {
-            padding: 14px 28px;
-            font-size: 1.1em;
-            border: 2px solid #444;
-            border-radius: 10px;
-            width: 320px;
-            text-align: center;
-            background: rgba(255,255,255,0.05);
             color: #fff;
-            outline: none;
+        }
+        .login-screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100vh; gap: 15px;
+        }
+        .login-screen h1 { color: #e94560; font-size: 2.2em; }
+        .login-screen p { color: #aaa; margin-bottom: 10px; }
+        .login-screen input {
+            padding: 14px 28px; font-size: 1.1em; border: 2px solid #444;
+            border-radius: 10px; width: 320px; text-align: center;
+            background: rgba(255,255,255,0.05); color: #fff; outline: none;
         }
         .login-screen input:focus { border-color: #e94560; }
         .login-screen input::placeholder { color: #666; }
         .login-screen button {
-            padding: 14px 50px;
-            font-size: 1.1em;
-            background: #e94560;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
+            padding: 14px 50px; font-size: 1.1em; background: #e94560;
+            color: white; border: none; border-radius: 10px; cursor: pointer;
         }
         .login-screen button:hover { background: #d63050; }
-
-        .main-content { display: none; padding: 16px; padding-bottom: 120px; }
+        .main-content { display: none; padding: 15px; padding-bottom: 100px; }
         .main-content.active { display: block; }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; background: rgba(0,0,0,0.3); border-radius: 12px;
+            margin-bottom: 15px; border: 1px solid #e94560;
+        }
+        .header h1 { color: #e94560; font-size: 1.3em; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .team-badge { background: #e94560; padding: 5px 14px; border-radius: 15px; font-weight: bold; font-size: 0.9em; }
+        .timer-display {
+            font-size: 1.8em; font-family: monospace; color: #4ecca3;
+            background: rgba(0,0,0,0.5); padding: 6px 20px; border-radius: 8px;
+        }
+        .timer-display.warning { color: #e94560; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .status { padding: 4px 12px; border-radius: 12px; font-size: 0.8em; }
+        .status.ok { background: #4ecca3; color: #1a1a2e; }
+        .status.err { background: #e94560; }
 
         .pots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 14px;
         }
         .pot-card {
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: border-color 0.3s;
+            background: rgba(255,255,255,0.04); border-radius: 12px;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.08);
         }
-        .pot-card.has-bids { border-color: rgba(78, 204, 163, 0.3); }
         .pot-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 10px 14px; background: rgba(0,0,0,0.2);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .pot-header h3 { color: #e94560; font-size: 1em; }
-        .pot-meta {
-            display: flex;
-            gap: 10px;
-            font-size: 0.75em;
-            color: #888;
+        .pot-header h3 { color: #e94560; font-size: 0.95em; }
+        .pot-meta { display: flex; gap: 8px; font-size: 0.72em; color: #888; }
+        .winners-badge {
+            background: rgba(233,69,96,0.2); color: #e94560;
+            padding: 2px 7px; border-radius: 8px; font-weight: bold;
         }
-        .pot-meta .winners-badge {
-            background: rgba(233, 69, 96, 0.2);
-            color: #e94560;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-        .pot-items { padding: 8px; }
-
+        .pot-items { padding: 6px; }
         .item-row {
-            display: flex;
-            align-items: center;
-            padding: 8px 10px;
-            margin: 4px 0;
-            background: rgba(0,0,0,0.25);
-            border-radius: 8px;
-            border: 1px solid transparent;
-            gap: 10px;
-            transition: all 0.2s;
+            display: flex; align-items: center; padding: 7px 10px; margin: 3px 0;
+            background: rgba(0,0,0,0.25); border-radius: 7px;
+            border: 1px solid transparent; gap: 8px; transition: all 0.2s;
         }
-        .item-row:hover { border-color: rgba(255,255,255,0.15); }
-        .item-row.has-bid { border-color: rgba(78, 204, 163, 0.4); background: rgba(78, 204, 163, 0.06); }
-        .item-id {
-            font-family: 'Courier New', monospace;
-            font-size: 0.75em;
-            color: #888;
-            min-width: 26px;
-        }
+        .item-row.has-bid { border-color: rgba(78,204,163,0.4); background: rgba(78,204,163,0.06); }
+        .item-row.winning { border-color: #4ecca3; }
+        .item-row.outbid { border-color: rgba(233,69,96,0.4); background: rgba(233,69,96,0.06); }
+        .item-id { font-family: monospace; font-size: 0.72em; color: #888; min-width: 24px; }
         .item-info { flex: 1; min-width: 0; }
-        .item-name {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #ddd;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .item-desc {
-            font-size: 0.72em;
-            color: #777;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .item-name { font-size: 0.88em; font-weight: 600; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-desc { font-size: 0.7em; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-status { font-size: 0.7em; color: #888; min-width: 55px; text-align: right; }
+        .item-status .high { color: #e94560; font-weight: bold; }
         .bid-input {
-            width: 56px;
-            padding: 6px 4px;
-            text-align: center;
-            border: 1px solid #444;
-            border-radius: 6px;
-            background: rgba(0,0,0,0.4);
-            color: #fff;
-            font-size: 0.95em;
-            font-weight: bold;
-            outline: none;
+            width: 52px; padding: 5px 3px; text-align: center;
+            border: 1px solid #444; border-radius: 5px;
+            background: rgba(0,0,0,0.4); color: #fff;
+            font-size: 0.9em; font-weight: bold; outline: none;
         }
         .bid-input:focus { border-color: #4ecca3; }
-        .bid-input.has-value { border-color: #4ecca3; background: rgba(78, 204, 163, 0.1); }
+        .bid-input.has-value { border-color: #4ecca3; background: rgba(78,204,163,0.1); }
 
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(15, 12, 41, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 2px solid #e94560;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+        .submit-section {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.9); padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 2px solid #e94560; z-index: 100;
         }
-        .bottom-bar .stats {
-            display: flex;
-            gap: 24px;
-            font-size: 0.9em;
-        }
-        .bottom-bar .stats span { color: #888; }
-        .bottom-bar .stats strong { color: #4ecca3; }
+        .budget-info { display: flex; gap: 20px; font-size: 0.9em; color: #888; }
+        .budget-info strong { color: #4ecca3; }
+        .budget-info strong.over { color: #ff4444; }
         .submit-btn {
-            padding: 10px 40px;
-            font-size: 1.1em;
-            background: #4ecca3;
-            color: #111;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
+            padding: 10px 35px; font-size: 1.1em; background: #4ecca3;
+            color: #1a1a2e; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: bold;
         }
-        .submit-btn:hover { background: #3dbb92; }
-        .submit-btn:disabled { background: #555; color: #888; cursor: not-allowed; }
-        .submit-btn.submitted { background: #666; }
+        .submit-btn:disabled { background: #666; cursor: not-allowed; color: #888; }
+        .frozen .bid-input { pointer-events: none; opacity: 0.5; }
+        .frozen-banner {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%,-50%); background: #e94560;
+            padding: 30px 60px; border-radius: 20px; font-size: 2em;
+            font-weight: bold; z-index: 1000;
+        }
+        .frozen .frozen-banner { display: block; }
 
-        .toast {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            z-index: 300;
-            animation: slideIn 0.3s ease;
-        }
-        .toast.success { background: #4ecca3; color: #111; }
-        .toast.error { background: #ff4444; color: #fff; }
-        .toast.info { background: #3498db; color: #fff; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        @media (max-width: 800px) {
-            .pots-grid { grid-template-columns: 1fr; }
-            .header { flex-wrap: wrap; gap: 8px; }
-            .header h1 { font-size: 1.1em; }
-        }
+        @media (max-width: 800px) { .pots-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-
-<div class="login-screen" id="loginScreen">
-    <h1>🏏 Block Diagram Auction</h1>
-    <p>Studio 1 — Crayfish Axon Core Conductor Model</p>
-    <input type="text" id="teamNameInput" placeholder="Enter your team name" autofocus>
-    <button onclick="joinAuction()">Join Auction</button>
-</div>
-
-<div class="main-content" id="mainContent">
-    <div class="header">
+    <div class="login-screen" id="loginScreen">
         <h1>🏏 Block Diagram Auction</h1>
-        <div class="header-info">
-            <div class="team-badge" id="teamBadge"></div>
-            <div class="budget-display">
-                Budget: <span class="amount ok" id="budgetDisplay">100</span> / 100
+        <p>Studio 1 — Crayfish Axon Core Conductor Model</p>
+        <input type="text" id="teamNameInput" placeholder="Enter Team Name" autofocus>
+        <button onclick="joinAuction()">Join Auction</button>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <h1>🏏 Block Diagram Auction</h1>
+            <div class="header-right">
+                <span class="team-badge" id="teamBadge"></span>
+                <span class="status err" id="status">Connecting...</span>
+                <div class="timer-display" id="timer">15:00</div>
             </div>
-            <div class="timer" id="timer">15:00</div>
         </div>
-    </div>
-    <div class="pots-grid" id="potsGrid"></div>
-    <div class="bottom-bar">
-        <div class="stats">
-            <span>Items bid on: <strong id="itemCount">0</strong> / <span id="totalItems">51</span></span>
-            <span>Pots covered: <strong id="potsCovered">0</strong> / 8</span>
-            <span>Points used: <strong id="pointsUsed">0</strong> / 100</span>
+        <div class="pots-grid" id="potsGrid"></div>
+        <div class="submit-section">
+            <div class="budget-info">
+                <span>Points: <strong id="pointsUsed">0</strong> / 100</span>
+                <span>Items: <strong id="itemCount">0</strong></span>
+                <span>Pots: <strong id="potsCovered">0</strong> / 8</span>
+            </div>
+            <button class="submit-btn" id="submitBtn" onclick="submitBids()">Update Bids</button>
         </div>
-        <button class="submit-btn" id="submitBtn" onclick="submitBids()">Submit Bids</button>
+        <div class="frozen-banner">⏱️ AUCTION CLOSED!</div>
     </div>
-</div>
 
 <script>
-// ============================================
-// HARDCODED CONFIG
-// ============================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
 const BUDGET = 100;
-const TIMER_MINUTES = 15;
+const DURATION = 15 * 60;
 
-// ============================================
-// AUCTION DATA
-// ============================================
-const AUCTION_POTS = [
+const POTS = [
   { id:"pot1", name:"Pot 1: Geometry", winnersPerItem:2, items:[
     {id:"G1",name:"a (axon radius)",desc:"Intracellular cross-section dimension"},
     {id:"G2",name:"b (extracellular boundary)",desc:"Extracellular cross-section dimension"},
@@ -346,64 +224,57 @@ const AUCTION_POTS = [
   ]}
 ];
 
-// ============================================
-// STATE
-// ============================================
 let teamName = '';
 let bids = {};
+let allBids = {};   // { itemId: { team: amount } } — from Sheets
+let timeLeft = DURATION;
 let timerInterval = null;
-let timeRemaining = TIMER_MINUTES * 60;
-let submitted = false;
 
-// ============================================
-// LOGIN
-// ============================================
+// --- LOGIN ---
 function joinAuction() {
     const name = document.getElementById('teamNameInput').value.trim();
-    if (!name) { showToast('Enter a team name', 'error'); return; }
+    if (!name) return;
     teamName = name;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainContent').classList.add('active');
     document.getElementById('teamBadge').textContent = teamName;
     renderPots();
     startTimer();
+    poll();
+    setInterval(poll, 2000);
 }
+document.getElementById('teamNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinAuction(); });
 
-document.getElementById('teamNameInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') joinAuction();
-});
-
-// ============================================
-// RENDER
-// ============================================
+// --- RENDER ---
 function renderPots() {
     const grid = document.getElementById('potsGrid');
     grid.innerHTML = '';
-    AUCTION_POTS.forEach(pot => {
+    POTS.forEach(pot => {
+        const wLabel = pot.winnersPerItem === 2 ? 'Top 2' : pot.winnersPerItem === 3 ? 'Top 3' : 'Top 4';
         const card = document.createElement('div');
         card.className = 'pot-card';
-        card.id = `card-${pot.id}`;
-        const winnersLabel = pot.winnersPerItem === 2 ? 'Top 2' :
-                             pot.winnersPerItem === 3 ? 'Top 3' : 'Top 4';
         card.innerHTML = `
             <div class="pot-header">
                 <h3>${pot.name}</h3>
                 <div class="pot-meta">
                     <span>${pot.items.length} items</span>
-                    <span class="winners-badge">${winnersLabel} win</span>
+                    <span class="winners-badge">${wLabel} win</span>
                 </div>
             </div>
             <div class="pot-items">
                 ${pot.items.map(item => `
-                    <div class="item-row" id="row-${item.id}">
+                    <div class="item-row" id="item-${item.id}">
                         <span class="item-id">${item.id}</span>
                         <div class="item-info">
                             <div class="item-name">${item.name}</div>
                             <div class="item-desc">${item.desc}</div>
                         </div>
+                        <div class="item-status">
+                            <span id="high-${item.id}">—</span>
+                        </div>
                         <input type="number" class="bid-input" id="bid-${item.id}"
                             min="0" max="100" placeholder="0"
-                            data-item="${item.id}" data-pot="${pot.id}"
+                            data-item="${item.id}"
                             onchange="updateBid(this)" oninput="updateBid(this)">
                     </div>
                 `).join('')}
@@ -411,154 +282,146 @@ function renderPots() {
         `;
         grid.appendChild(card);
     });
-    document.getElementById('totalItems').textContent =
-        AUCTION_POTS.reduce((s, p) => s + p.items.length, 0);
 }
 
-// ============================================
-// BID MANAGEMENT
-// ============================================
+// --- BIDS ---
 function updateBid(input) {
-    const itemId = input.dataset.item;
+    const id = input.dataset.item;
     const val = parseInt(input.value) || 0;
-    const row = document.getElementById(`row-${itemId}`);
-    if (val > 0) {
-        bids[itemId] = val;
-        input.classList.add('has-value');
-        row.classList.add('has-bid');
-    } else {
-        delete bids[itemId];
-        input.classList.remove('has-value');
-        row.classList.remove('has-bid');
-    }
+    if (val > 0) { bids[id] = val; input.classList.add('has-value'); }
+    else { delete bids[id]; input.classList.remove('has-value'); }
     updateStats();
+    updateAllStatuses();
 }
 
 function updateStats() {
-    const totalSpent = Object.values(bids).reduce((s, v) => s + v, 0);
-    const itemsBidOn = Object.keys(bids).length;
-    const potsCovered = new Set();
-    AUCTION_POTS.forEach(pot => {
-        pot.items.forEach(item => {
-            if (bids[item.id]) potsCovered.add(pot.id);
-        });
-    });
+    const used = Object.values(bids).reduce((s,v) => s+v, 0);
+    const count = Object.keys(bids).length;
+    const pots = new Set();
+    POTS.forEach(pot => pot.items.forEach(item => { if (bids[item.id]) pots.add(pot.id); }));
 
-    document.getElementById('pointsUsed').textContent = totalSpent;
-    document.getElementById('itemCount').textContent = itemsBidOn;
-    document.getElementById('potsCovered').textContent = potsCovered.size;
-
-    const budgetEl = document.getElementById('budgetDisplay');
-    const remaining = BUDGET - totalSpent;
-    budgetEl.textContent = remaining;
-    budgetEl.className = 'amount ' + (remaining < 0 ? 'over' : remaining < 15 ? 'warn' : 'ok');
-
-    AUCTION_POTS.forEach(pot => {
-        const card = document.getElementById(`card-${pot.id}`);
-        const hasBids = pot.items.some(item => bids[item.id]);
-        card.classList.toggle('has-bids', hasBids);
-    });
-
-    const btn = document.getElementById('submitBtn');
-    if (submitted) {
-        btn.textContent = '✓ Submitted';
-        btn.disabled = true;
-        btn.classList.add('submitted');
-    } else if (totalSpent > BUDGET) {
-        btn.textContent = `Over budget by ${totalSpent - BUDGET}`;
-        btn.disabled = true;
-    } else if (totalSpent === 0) {
-        btn.textContent = 'No bids placed';
-        btn.disabled = true;
-    } else {
-        btn.textContent = `Submit Bids (${totalSpent} pts)`;
-        btn.disabled = false;
-    }
+    const usedEl = document.getElementById('pointsUsed');
+    usedEl.textContent = used;
+    usedEl.className = used > BUDGET ? 'over' : '';
+    document.getElementById('itemCount').textContent = count;
+    document.getElementById('potsCovered').textContent = pots.size;
+    document.getElementById('submitBtn').disabled = used > BUDGET;
 }
 
-// ============================================
-// TIMER
-// ============================================
-function startTimer() {
-    updateTimerDisplay();
-    timerInterval = setInterval(() => {
-        timeRemaining--;
-        updateTimerDisplay();
-        if (timeRemaining <= 0) {
-            clearInterval(timerInterval);
-            if (!submitted) submitBids(true);
+function getHighBid(itemId) {
+    if (!allBids[itemId]) return 0;
+    return Math.max(...Object.values(allBids[itemId]), 0);
+}
+
+function getTopN(itemId, n) {
+    if (!allBids[itemId]) return [];
+    return Object.entries(allBids[itemId])
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, n)
+        .map(e => e[0]);
+}
+
+function updateAllStatuses() {
+    POTS.forEach(pot => pot.items.forEach(item => {
+        const row = document.getElementById('item-' + item.id);
+        const highEl = document.getElementById('high-' + item.id);
+        if (!row) return;
+
+        const myBid = bids[item.id] || 0;
+        const high = getHighBid(item.id);
+        const winners = getTopN(item.id, pot.winnersPerItem);
+
+        highEl.innerHTML = high > 0 ? `<span class="high">${high}</span>` : '—';
+
+        row.classList.remove('has-bid','winning','outbid');
+        if (myBid > 0) {
+            row.classList.add('has-bid');
+            if (winners.includes(teamName)) row.classList.add('winning');
+            else row.classList.add('outbid');
         }
+    }));
+}
+
+// --- TIMER ---
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('mainContent').classList.add('frozen');
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        const el = document.getElementById('timer');
+        el.textContent = m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+        if (timeLeft < 120) el.classList.add('warning');
     }, 1000);
 }
 
-function updateTimerDisplay() {
-    const el = document.getElementById('timer');
-    const min = Math.floor(Math.max(0, timeRemaining) / 60);
-    const sec = Math.max(0, timeRemaining) % 60;
-    el.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
-    if (timeRemaining <= 0) {
-        el.classList.add('expired');
-        el.classList.remove('warning');
-        el.textContent = "CLOSED";
-    } else if (timeRemaining <= 120) {
-        el.classList.add('warning');
-    }
-}
+// --- SUBMIT (form POST, same as previous) ---
+function submitBids() {
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'Saving...';
 
-// ============================================
-// SUBMIT
-// ============================================
-async function submitBids(auto = false) {
-    if (submitted) return;
-    const totalSpent = Object.values(bids).reduce((s, v) => s + v, 0);
-    if (totalSpent > BUDGET) {
-        showToast('Over budget! Remove some bids first.', 'error');
-        return;
-    }
-    if (totalSpent === 0 && !auto) {
-        showToast('Place at least one bid.', 'error');
-        return;
-    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = API;
+    form.target = 'submitFrame';
 
-    submitted = true;
-    updateStats();
-
-    const payload = {
-        action: 'submitBids',
-        team: teamName,
-        bids: bids,
-        timestamp: new Date().toISOString()
+    const addField = (name, val) => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = name; inp.value = val;
+        form.appendChild(inp);
     };
 
-    try {
-        showToast('Submitting...', 'info');
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        showToast('Bids submitted!', 'success');
-    } catch (err) {
-        showToast('Bids saved locally (network issue)', 'info');
-        console.error('Submit error:', err);
+    addField('action', 'submitBids');
+    addField('teamName', teamName);
+    addField('bids', JSON.stringify(bids));
+
+    let iframe = document.getElementById('submitFrame');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'submitFrame';
+        iframe.name = 'submitFrame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
     }
 
-    localStorage.setItem(`auction_${teamName}`, JSON.stringify(payload));
-    document.querySelectorAll('.bid-input').forEach(input => input.disabled = true);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    setTimeout(() => { btn.textContent = 'Update Bids'; poll(); }, 2000);
 }
 
-// ============================================
-// TOAST
-// ============================================
-function showToast(msg, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+// --- POLL (JSONP, same as previous) ---
+function poll() {
+    const script = document.createElement('script');
+    const cb = 'cb_' + Date.now();
+
+    window[cb] = function(data) {
+        if (data && data.bids) {
+            allBids = data.bids;
+            updateAllStatuses();
+            setStatus(true);
+        }
+        delete window[cb];
+        script.remove();
+    };
+
+    script.src = API + '?action=getAllBids&callback=' + cb;
+    script.onerror = () => { setStatus(false); script.remove(); delete window[cb]; };
+    document.body.appendChild(script);
 }
 
+function setStatus(ok) {
+    const el = document.getElementById('status');
+    el.textContent = ok ? 'Connected' : 'Offline';
+    el.className = 'status ' + (ok ? 'ok' : 'err');
+}
+
+// --- KEYBOARD NAV ---
 document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.classList.contains('bid-input')) {
         const inputs = [...document.querySelectorAll('.bid-input')];

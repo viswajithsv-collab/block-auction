@@ -14,65 +14,43 @@
             padding: 20px;
         }
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #e94560;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px;
+            margin-bottom: 20px; border: 1px solid #e94560;
         }
         .header h1 { color: #e94560; }
-        .controls { display: flex; gap: 15px; }
+        .controls { display: flex; gap: 15px; align-items: center; }
         .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1em;
+            padding: 12px 25px; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-size: 1em;
         }
         .btn-start { background: #4ecca3; color: #1a1a2e; }
         .btn-freeze { background: #e94560; color: white; }
         .btn-reset { background: #666; color: white; }
         .timer-display {
-            font-size: 2.5em;
-            font-family: monospace;
-            color: #4ecca3;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 30px;
-            border-radius: 10px;
+            font-size: 2.5em; font-family: monospace; color: #4ecca3;
+            background: rgba(0,0,0,0.5); padding: 10px 30px; border-radius: 10px;
         }
         .timer-display.warning { color: #e94560; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
         .status { padding: 5px 15px; border-radius: 15px; font-size: 0.9em; margin-left: 20px; }
         .status.ok { background: #4ecca3; color: #1a1a2e; }
         .status.err { background: #e94560; }
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .panel {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); border-radius: 15px;
+            padding: 20px; border: 1px solid rgba(255,255,255,0.1);
         }
         .panel h2 {
-            color: #e94560;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #e94560; margin-bottom: 15px;
+            padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .panel.full { grid-column: 1 / -1; }
         .wanted-list { max-height: 400px; overflow-y: auto; }
         .wanted-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin: 8px 0;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-            border-left: 4px solid #4ecca3;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; margin: 8px 0; background: rgba(0,0,0,0.3);
+            border-radius: 8px; border-left: 4px solid #4ecca3;
         }
         .wanted-item .rank { font-size: 1.5em; font-weight: bold; color: #e94560; width: 40px; }
         .wanted-item .info { flex: 1; margin-left: 15px; }
@@ -82,55 +60,37 @@
         .bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 5px; }
         .bar-fill { height: 100%; background: linear-gradient(90deg, #4ecca3, #e94560); border-radius: 3px; }
         .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            max-height: 500px;
-            overflow-y: auto;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px; max-height: 500px; overflow-y: auto;
         }
         .team-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3); border-radius: 10px;
+            padding: 15px; border: 1px solid rgba(255,255,255,0.1);
         }
         .team-card h3 { color: #4ecca3; margin-bottom: 10px; }
         .team-card .stat { display: flex; justify-content: space-between; margin: 5px 0; font-size: 0.9em; }
         .team-card .stat .label { color: #888; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .tab {
-            padding: 10px 25px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
+            padding: 10px 25px; background: rgba(255,255,255,0.1);
+            border: none; border-radius: 8px; color: #fff; cursor: pointer;
         }
         .tab.active { background: #e94560; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .winners-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;
         }
         .winner-card {
-            background: rgba(78, 204, 163, 0.1);
-            border: 2px solid #4ecca3;
-            border-radius: 10px;
-            padding: 15px;
-            align-self: start;
-        }
-        @media (max-width: 1200px) {
-            .winners-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 900px) {
-            .winners-grid { grid-template-columns: repeat(2, 1fr); }
+            background: rgba(78,204,163,0.1); border: 2px solid #4ecca3;
+            border-radius: 10px; padding: 15px; align-self: start;
         }
         .winner-card h4 { color: #4ecca3; margin-bottom: 10px; }
+        .winner-card .pot-rule { font-size: 0.8em; color: #888; margin-bottom: 8px; }
         .winner-item { margin: 8px 0; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px; }
         .winner-item .item-name { color: #888; font-size: 0.9em; }
         .winner-item .winner-team { color: #e94560; font-weight: bold; }
+        .winner-item .winner-team.multi { color: #4ecca3; }
     </style>
 </head>
 <body>
@@ -178,32 +138,53 @@
     <div class="tab-content" id="tab-winners">
         <div class="panel">
             <h2>🏆 Auction Results</h2>
+            <p style="color:#888;margin-bottom:15px;">Variable winners per pot: Top 2 (8-item pots), Top 3 (6-item pots), Top 4 (4-5 item pots)</p>
             <div class="winners-grid" id="winnersGrid"></div>
         </div>
     </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwbMIZyLuPD4kIDN0XJXfr4B1UDCcPwUkEtQon2lLWHqXUOpIzBgh4kFDxI9PFkrzM/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
 const DURATION = 15 * 60;
 
-const SETS = [
-    { id: "set1", name: "Set 1: Geometry", items: [{id:"a",name:"a"},{id:"b",name:"b"},{id:"ri_eq",name:"r<sub>i</sub> = ρ<sub>i</sub>/πa²"},{id:"ro_eq",name:"r<sub>o</sub> = ρ<sub>o</sub>/π(b²−a²)"}]},
-    { id: "set2", name: "Set 2: Passive Membrane", items: [{id:"gleak",name:"g<sub>leak</sub>"},{id:"Erest",name:"E<sub>rest</sub>"},{id:"Kleak",name:"K<sub>leak</sub>"}]},
-    { id: "set3", name: "Set 3: Synaptic Input", items: [{id:"gsyn",name:"g<sub>syn</sub>(t)"},{id:"Esyn",name:"E<sub>syn</sub>"},{id:"Ksyn",name:"K<sub>syn</sub>"}]},
-    { id: "set4", name: "Set 4: Ion Potentials", items: [{id:"ENa",name:"E<sub>Na</sub>"},{id:"EK",name:"E<sub>K</sub>"},{id:"ECl",name:"E<sub>Cl</sub>"}]},
-    { id: "set5", name: "Set 5: EPSP", items: [{id:"Esyn_epsp",name:"E<sub>syn</sub> > E<sub>rest</sub>"},{id:"df_epsp",name:"(V<sub>m</sub> − E<sub>syn</sub>) < 0"},{id:"Ksyn_epsp",name:"K<sub>syn</sub> < 0 (inward)"}]},
-    { id: "set6", name: "Set 6: IPSP", items: [{id:"Esyn_ipsp",name:"E<sub>syn</sub> < E<sub>rest</sub>"},{id:"df_ipsp",name:"(V<sub>m</sub> − E<sub>syn</sub>) > 0"},{id:"Ksyn_ipsp",name:"K<sub>syn</sub> > 0 (outward)"}]},
-    { id: "set7", name: "Set 7: Membrane Current", items: [{id:"Km_total",name:"K<sub>m</sub> = K<sub>leak</sub> + K<sub>syn</sub>"},{id:"z0",name:"z<sub>0</sub>"}]},
-    { id: "set8", name: "Set 8: Intracellular", items: [{id:"Ii",name:"I<sub>i</sub>"},{id:"Vi",name:"V<sub>i</sub>"},{id:"dVi",name:"∂V<sub>i</sub>/∂z = −r<sub>i</sub>I<sub>i</sub>"}]},
-    { id: "set9", name: "Set 9: Extracellular", items: [{id:"Io",name:"I<sub>o</sub>"},{id:"Vo",name:"V<sub>o</sub>"},{id:"dVo",name:"∂V<sub>o</sub>/∂z = −r<sub>o</sub>I<sub>o</sub>"}]},
-    { id: "set10", name: "Set 10: Conservation", items: [{id:"dIi",name:"∂I<sub>i</sub>/∂z = −K<sub>m</sub>"},{id:"dIo",name:"∂I<sub>o</sub>/∂z = K<sub>m</sub>"}]},
-    { id: "set11", name: "Set 11: Membrane Potential", items: [{id:"Vm_def",name:"V<sub>m</sub> = V<sub>i</sub> − V<sub>o</sub>"},{id:"Vi_eq",name:"V<sub>i</sub> = V<sub>m</sub> + V<sub>o</sub>"}]},
-    { id: "set12", name: "Set 12: Governing Eq", items: [{id:"gov_eq",name:"∂²V<sub>m</sub>/∂z² = (r<sub>o</sub>+r<sub>i</sub>)K<sub>m</sub>"}]},
-    { id: "set13", name: "Set 13: Intra Recording", items: [{id:"intra_elec",name:"Intracellular electrode"},{id:"epsp_intra",name:"EPSP: V<sub>i</sub> ↑"},{id:"ipsp_intra",name:"IPSP: V<sub>i</sub> ↓"}]},
-    { id: "set14", name: "Set 14: Extra Recording", items: [{id:"extra_elec",name:"Extracellular electrode"},{id:"epsp_extra",name:"EPSP: V<sub>o</sub> ↓"},{id:"ipsp_extra",name:"IPSP: V<sub>o</sub> ↑"}]},
-    { id: "set15", name: "Set 15: Constraints", items: [{id:"ro_constraint",name:"r<sub>o</sub> > 0"},{id:"gsyn_constraint",name:"g<sub>syn</sub> > 0"}]},
-    { id: "set16", name: "Set 16: Polarity", items: [{id:"polarity",name:"ΔV<sub>o</sub> opposite to ΔV<sub>m</sub>"},{id:"ro_magnitude",name:"|ΔV<sub>o</sub>| depends on r<sub>o</sub>"}]}
+const POTS = [
+  { id:"pot1", name:"Pot 1: Geometry", winnersPerItem:2, items:[
+    {id:"G1",name:"a"},{id:"G2",name:"b"},{id:"G3",name:"ρᵢ"},{id:"G4",name:"ρₒ"},
+    {id:"G5",name:"rᵢ formula"},{id:"G6",name:"rₒ formula"},{id:"G7",name:"Micrometer"},{id:"G8",name:"Impedance"}
+  ]},
+  { id:"pot2", name:"Pot 2: Resting Membrane", winnersPerItem:3, items:[
+    {id:"R1",name:"g_leak"},{id:"R2",name:"E_rest"},{id:"R3",name:"K_leak formula"},
+    {id:"R4",name:"Equilibrium"},{id:"R5",name:"Current clamp"},{id:"R6",name:"Voltage clamp"}
+  ]},
+  { id:"pot3", name:"Pot 3: Synapse", winnersPerItem:3, items:[
+    {id:"S1",name:"g_syn(t)"},{id:"S2",name:"E_syn"},{id:"S3",name:"K_syn formula"},
+    {id:"S4",name:"Transient"},{id:"S5",name:"Reversal expt"},{id:"S6",name:"Paired recording"}
+  ]},
+  { id:"pot4", name:"Pot 4: EPSP vs IPSP", winnersPerItem:2, items:[
+    {id:"E1",name:"E_syn &gt; E_rest"},{id:"E2",name:"E_syn &lt; E_rest"},{id:"E3",name:"EPSP DF &lt; 0"},
+    {id:"E4",name:"IPSP DF &gt; 0"},{id:"E5",name:"EPSP sink"},{id:"E6",name:"IPSP source"},
+    {id:"E7",name:"Cation ch"},{id:"E8",name:"Cl⁻ ch"}
+  ]},
+  { id:"pot5", name:"Pot 5: Ohm\u2019s Law", winnersPerItem:2, items:[
+    {id:"O1",name:"Ii"},{id:"O2",name:"Io"},{id:"O3",name:"Vi"},{id:"O4",name:"Vo"},
+    {id:"O5",name:"dVi/dz"},{id:"O6",name:"dVo/dz"},{id:"O7",name:"Current inj"},{id:"O8",name:"V gradient"}
+  ]},
+  { id:"pot6", name:"Pot 6: KCL", winnersPerItem:4, items:[
+    {id:"K1",name:"dIi/dz"},{id:"K2",name:"dIo/dz"},{id:"K3",name:"Km sum"},
+    {id:"K4",name:"Sink"},{id:"K5",name:"Source"}
+  ]},
+  { id:"pot7", name:"Pot 7: Membrane V", winnersPerItem:4, items:[
+    {id:"M1",name:"Vm=Vi-Vo"},{id:"M2",name:"Vi=Vm+Vo"},{id:"M3",name:"Diff recording"},{id:"M4",name:"Vi approx Vm"}
+  ]},
+  { id:"pot8", name:"Pot 8: Electrodes", winnersPerItem:3, items:[
+    {id:"L1",name:"Intra electrode"},{id:"L2",name:"Extra electrode"},{id:"L3",name:"ro>0"},
+    {id:"L4",name:"EPSP polarity"},{id:"L5",name:"IPSP polarity"},{id:"L6",name:"dVo prop ro"}
+  ]}
 ];
+
+// Build item→pot lookup
+const ITEM_POT = {};
+POTS.forEach(pot => pot.items.forEach(item => { ITEM_POT[item.id] = pot; }));
 
 let allBids = {};
 let timeLeft = DURATION;
@@ -238,7 +219,6 @@ function freezeAuction() {
 
 function resetAuction() {
     if (!confirm('Reset auction? All bids will be cleared.')) return;
-    
     const script = document.createElement('script');
     const cb = 'reset_' + Date.now();
     window[cb] = function(data) {
@@ -263,10 +243,10 @@ function updateTimer() {
     if (timeLeft < 120) document.getElementById('timer').classList.add('warning');
 }
 
+// --- POLLING (JSONP, every 2s) ---
 function poll() {
     const script = document.createElement('script');
     const cb = 'cb_' + Date.now();
-    
     window[cb] = function(data) {
         if (data && data.bids) {
             allBids = data.bids;
@@ -276,7 +256,6 @@ function poll() {
         delete window[cb];
         script.remove();
     };
-    
     script.src = API + '?action=getAllBids&callback=' + cb;
     script.onerror = () => { setStatus(false); script.remove(); delete window[cb]; };
     document.body.appendChild(script);
@@ -296,11 +275,11 @@ function updateDisplays() {
 
 function getItemTotals() {
     const totals = [];
-    SETS.forEach(s => s.items.forEach(i => {
-        const bids = allBids[i.id] || {};
+    POTS.forEach(pot => pot.items.forEach(item => {
+        const bids = allBids[item.id] || {};
         const total = Object.values(bids).reduce((a,b) => a+b, 0);
         const count = Object.values(bids).filter(b => b > 0).length;
-        totals.push({ id: i.id, name: i.name, total, count });
+        totals.push({ id: item.id, name: item.name, total, count });
     }));
     return totals;
 }
@@ -309,90 +288,88 @@ function renderMostWanted() {
     const c = document.getElementById('mostWanted');
     const items = getItemTotals().sort((a,b) => b.total - a.total).slice(0, 10);
     const max = items[0]?.total || 1;
-    
     c.innerHTML = items.map((item, i) => `
         <div class="wanted-item">
             <div class="rank">#${i+1}</div>
             <div class="info">
-                <div class="name">${item.name}</div>
-                <div class="teams">${item.count} teams</div>
+                <div class="name">${item.id}: ${item.name}</div>
+                <div class="teams">${item.count} teams bidding</div>
                 <div class="bar"><div class="bar-fill" style="width:${(item.total/max)*100}%"></div></div>
             </div>
             <div class="total">${item.total}</div>
         </div>
-    `).join('');
+    `).join('') || '<p style="color:#888">No bids yet...</p>';
 }
 
 function renderLeastWanted() {
     const c = document.getElementById('leastWanted');
-    const items = getItemTotals().sort((a,b) => a.total - b.total).slice(0, 10);
-    const max = Math.max(...getItemTotals().map(i => i.total)) || 1;
-    
+    const all = getItemTotals();
+    const items = all.sort((a,b) => a.total - b.total).slice(0, 10);
+    const max = Math.max(...all.map(i => i.total)) || 1;
     c.innerHTML = items.map((item, i) => `
         <div class="wanted-item">
             <div class="rank">#${i+1}</div>
             <div class="info">
-                <div class="name">${item.name}</div>
-                <div class="teams">${item.count} teams</div>
+                <div class="name">${item.id}: ${item.name}</div>
+                <div class="teams">${item.count} teams bidding</div>
                 <div class="bar"><div class="bar-fill" style="width:${(item.total/max)*100}%"></div></div>
             </div>
             <div class="total">${item.total}</div>
         </div>
-    `).join('');
+    `).join('') || '<p style="color:#888">No bids yet...</p>';
 }
 
 function renderTeamGrid() {
     const teams = {};
-    
     Object.entries(allBids).forEach(([itemId, bids]) => {
         Object.entries(bids).forEach(([team, amount]) => {
-            if (!teams[team]) teams[team] = { total: 0, items: 0, winning: 0 };
+            if (!teams[team]) teams[team] = { total: 0, items: 0, winning: 0, pots: new Set() };
             if (amount > 0) {
                 teams[team].total += amount;
                 teams[team].items++;
+                if (ITEM_POT[itemId]) teams[team].pots.add(ITEM_POT[itemId].id);
             }
         });
     });
-    
-    // Count winning items
-    Object.entries(allBids).forEach(([itemId, bids]) => {
-        let max = 0, winner = null;
-        Object.entries(bids).forEach(([team, amount]) => {
-            if (amount > max) { max = amount; winner = team; }
-        });
-        if (winner && teams[winner]) teams[winner].winning++;
-    });
-    
+
+    // Count winning items (top N per pot)
+    POTS.forEach(pot => pot.items.forEach(item => {
+        const bids = allBids[item.id] || {};
+        const sorted = Object.entries(bids).sort((a,b) => b[1] - a[1]);
+        const winners = sorted.slice(0, pot.winnersPerItem).map(e => e[0]);
+        winners.forEach(w => { if (teams[w]) teams[w].winning++; });
+    }));
+
     const html = Object.entries(teams).map(([name, data]) => `
         <div class="team-card">
             <h3>${name}</h3>
             <div class="stat"><span class="label">Points used:</span><span>${data.total}</span></div>
             <div class="stat"><span class="label">Items bid:</span><span>${data.items}</span></div>
             <div class="stat"><span class="label">Winning:</span><span>${data.winning}</span></div>
+            <div class="stat"><span class="label">Pots covered:</span><span>${data.pots.size}/8</span></div>
         </div>
     `).join('');
-    
+
     document.getElementById('teamGrid').innerHTML = html || '<p style="color:#888">No teams yet...</p>';
     document.getElementById('teamGridFull').innerHTML = html || '<p style="color:#888">No teams yet...</p>';
 }
 
 function renderWinners() {
     const c = document.getElementById('winnersGrid');
-    
-    c.innerHTML = SETS.map(set => `
+    c.innerHTML = POTS.map(pot => `
         <div class="winner-card">
-            <h4>${set.name}</h4>
-            ${set.items.map(item => {
+            <h4>${pot.name}</h4>
+            <div class="pot-rule">Top ${pot.winnersPerItem} bidders win each item</div>
+            ${pot.items.map(item => {
                 const bids = allBids[item.id] || {};
-                let max = 0, winner = null;
-                Object.entries(bids).forEach(([team, amount]) => {
-                    if (amount > max) { max = amount; winner = team; }
-                });
+                const sorted = Object.entries(bids).sort((a,b) => b[1] - a[1]);
+                const winners = sorted.slice(0, pot.winnersPerItem);
                 return `
                     <div class="winner-item">
-                        <div class="item-name">${item.name}</div>
-                        <div class="winner-team">${winner || 'No bids'}</div>
-                        ${winner ? `<div style="color:#4ecca3;font-size:0.8em">${max} pts</div>` : ''}
+                        <div class="item-name">${item.id}: ${item.name}</div>
+                        ${winners.length > 0 ? winners.map(([team, amt]) =>
+                            `<div class="winner-team multi">${team} <span style="color:#888;font-size:0.8em">(${amt}pts)</span></div>`
+                        ).join('') : '<div class="winner-team" style="color:#666">No bids</div>'}
                     </div>
                 `;
             }).join('')}

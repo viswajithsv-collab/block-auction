@@ -52,7 +52,7 @@
 
         .pots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 14px;
         }
         .pot-card {
@@ -108,7 +108,17 @@
             cursor: pointer; font-weight: bold;
         }
         .submit-btn:disabled { background: #666; cursor: not-allowed; color: #888; }
+        .final-btn {
+            padding: 10px 35px; font-size: 1.1em; background: #e94560;
+            color: white; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: bold;
+        }
+        .final-btn:disabled { background: #666; cursor: not-allowed; color: #888; }
+        .final-btn.locked { background: #444; }
+        .btn-group { display: flex; gap: 10px; }
         .frozen .bid-input { pointer-events: none; opacity: 0.5; }
+        .frozen .submit-btn { display: none; }
+        .frozen .final-btn { display: none; }
         .frozen-banner {
             display: none; position: fixed; top: 50%; left: 50%;
             transform: translate(-50%,-50%); background: #e94560;
@@ -117,7 +127,9 @@
         }
         .frozen .frozen-banner { display: block; }
 
-        @media (max-width: 800px) { .pots-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1400px) { .pots-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1000px) { .pots-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .pots-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -144,7 +156,10 @@
                 <span>Items: <strong id="itemCount">0</strong></span>
                 <span>Pots: <strong id="potsCovered">0</strong> / 8</span>
             </div>
-            <button class="submit-btn" id="submitBtn" onclick="submitBids()">Update Bids</button>
+            <div class="btn-group">
+                <button class="submit-btn" id="submitBtn" onclick="submitBids()">Update Bids</button>
+                <button class="final-btn" id="finalBtn" onclick="finalSubmit()">🔒 Submit Final Bids</button>
+            </div>
         </div>
         <div class="frozen-banner">⏱️ AUCTION CLOSED!</div>
     </div>
@@ -229,6 +244,7 @@ let bids = {};
 let allBids = {};   // { itemId: { team: amount } } — from Sheets
 let timeLeft = DURATION;
 let timerInterval = null;
+let frozen = false;
 
 // --- LOGIN ---
 function joinAuction() {
@@ -347,6 +363,10 @@ function startTimer() {
     timerInterval = setInterval(() => {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
+            if (!frozen) {
+                doSubmit();
+                frozen = true;
+            }
             document.getElementById('mainContent').classList.add('frozen');
             return;
         }
@@ -361,9 +381,31 @@ function startTimer() {
 
 // --- SUBMIT (form POST, same as previous) ---
 function submitBids() {
+    if (frozen) return;
     const btn = document.getElementById('submitBtn');
     btn.textContent = 'Saving...';
 
+    doSubmit();
+
+    setTimeout(() => { btn.textContent = 'Update Bids'; poll(); }, 2000);
+}
+
+function finalSubmit() {
+    if (frozen) return;
+    const used = Object.values(bids).reduce((s,v) => s+v, 0);
+    if (used > BUDGET) { alert('Over budget! Remove some bids first.'); return; }
+    if (used === 0) { alert('Place at least one bid before submitting.'); return; }
+    if (!confirm('Lock in your final bids? You will NOT be able to change them after this.')) return;
+
+    doSubmit();
+    frozen = true;
+    document.getElementById('mainContent').classList.add('frozen');
+    document.getElementById('finalBtn').textContent = '✓ Bids Locked';
+    document.getElementById('finalBtn').classList.add('locked');
+    document.getElementById('finalBtn').disabled = true;
+}
+
+function doSubmit() {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = API;
@@ -391,8 +433,6 @@ function submitBids() {
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
-
-    setTimeout(() => { btn.textContent = 'Update Bids'; poll(); }, 2000);
 }
 
 // --- POLL (JSONP, same as previous) ---

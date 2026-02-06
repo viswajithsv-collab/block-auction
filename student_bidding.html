@@ -3,38 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Block Diagram Auction</title>
+    <title>Block Diagram Auction — Studio 1</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
             min-height: 100vh;
-            color: #fff;
+            color: #e0e0e0;
         }
         .header {
-            background: rgba(0,0,0,0.3);
-            padding: 15px 30px;
+            background: rgba(0,0,0,0.4);
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #e94560;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
-        .header h1 { color: #e94560; font-size: 1.8em; }
-        .header-info { display: flex; gap: 30px; align-items: center; }
-        .team-name { background: #e94560; padding: 8px 20px; border-radius: 20px; font-weight: bold; }
-        .budget-display { font-size: 1.4em; }
-        .budget-display span { color: #4ecca3; font-weight: bold; }
+        .header h1 { color: #e94560; font-size: 1.4em; }
+        .header-info { display: flex; gap: 20px; align-items: center; }
+        .team-badge {
+            background: #e94560;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .budget-display { font-size: 1.1em; }
+        .budget-display .amount { font-weight: bold; font-size: 1.3em; }
+        .budget-display .amount.ok { color: #4ecca3; }
+        .budget-display .amount.warn { color: #ffc107; }
+        .budget-display .amount.over { color: #ff4444; }
         .timer {
             background: #e94560;
-            padding: 10px 25px;
-            border-radius: 10px;
-            font-size: 1.5em;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 1.3em;
             font-weight: bold;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
+            min-width: 80px;
+            text-align: center;
         }
         .timer.warning { animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { background: #e94560; } 50% { background: #ff6b6b; } }
+        .timer.expired { background: #666; }
+        @keyframes pulse { 0%,100% { background: #e94560; } 50% { background: #ff2244; } }
+
         .login-screen {
             display: flex;
             justify-content: center;
@@ -43,439 +60,511 @@
             flex-direction: column;
             gap: 20px;
         }
-        .login-screen h1 { color: #e94560; font-size: 2.5em; margin-bottom: 20px; }
+        .login-screen h1 { color: #e94560; font-size: 2.2em; margin-bottom: 10px; }
+        .login-screen p { color: #aaa; margin-bottom: 20px; font-size: 1.1em; }
         .login-screen input {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            border: none;
+            padding: 14px 28px;
+            font-size: 1.1em;
+            border: 2px solid #444;
             border-radius: 10px;
-            width: 300px;
+            width: 320px;
             text-align: center;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            outline: none;
         }
+        .login-screen input:focus { border-color: #e94560; }
+        .login-screen input::placeholder { color: #666; }
         .login-screen button {
-            padding: 15px 50px;
-            font-size: 1.2em;
+            padding: 14px 50px;
+            font-size: 1.1em;
             background: #e94560;
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
+            transition: background 0.2s;
         }
-        .main-content { display: none; padding: 20px; padding-bottom: 100px; }
+        .login-screen button:hover { background: #d63050; }
+
+        .main-content { display: none; padding: 16px; padding-bottom: 120px; }
         .main-content.active { display: block; }
-        .sets-container {
+
+        .pots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 16px;
         }
-        .set-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
+        .pot-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: border-color 0.3s;
         }
-        .set-header {
-            background: rgba(233, 69, 96, 0.3);
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .set-header h3 { color: #e94560; margin-bottom: 5px; }
-        .set-header p { color: #aaa; font-size: 0.9em; }
-        .set-items { padding: 10px; }
-        .item {
+        .pot-card.has-bids { border-color: rgba(78, 204, 163, 0.3); }
+        .pot-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            margin: 8px 0;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            border: 1px solid transparent;
-            transition: all 0.3s;
         }
-        .item:hover { border-color: #4ecca3; }
-        .item.has-bid { border-color: #4ecca3; background: rgba(78, 204, 163, 0.1); }
-        .item.outbid { border-color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
-        .item.winning { border-color: #4ecca3; background: rgba(78, 204, 163, 0.2); box-shadow: 0 0 10px rgba(78, 204, 163, 0.3); }
-        .item-info { flex: 1; }
-        .item-name { font-weight: bold; color: #fff; font-size: 1.1em; }
-        .item-desc { color: #888; font-size: 0.85em; margin-top: 3px; }
-        .item-bidding { display: flex; align-items: center; gap: 10px; }
-        .current-high { text-align: right; min-width: 80px; }
-        .current-high .label { font-size: 0.7em; color: #888; }
-        .current-high .value { font-weight: bold; color: #4ecca3; }
-        .current-high .leader { font-size: 0.7em; color: #e94560; }
-        .bid-input {
-            width: 70px;
-            padding: 8px;
-            border: 2px solid #4ecca3;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.5);
-            color: #fff;
-            text-align: center;
-            font-size: 1em;
+        .pot-header h3 { color: #e94560; font-size: 1em; }
+        .pot-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.75em;
+            color: #888;
+        }
+        .pot-meta .winners-badge {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+            padding: 2px 8px;
+            border-radius: 10px;
             font-weight: bold;
         }
-        .bid-input:focus { outline: none; border-color: #e94560; }
-        .submit-section {
+        .pot-items { padding: 8px; }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            margin: 4px 0;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            border: 1px solid transparent;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .item-row:hover { border-color: rgba(255,255,255,0.15); }
+        .item-row.has-bid { border-color: rgba(78, 204, 163, 0.4); background: rgba(78, 204, 163, 0.06); }
+        .item-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75em;
+            color: #888;
+            min-width: 26px;
+        }
+        .item-info { flex: 1; min-width: 0; }
+        .item-name {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #ddd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .item-desc {
+            font-size: 0.72em;
+            color: #777;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bid-input {
+            width: 56px;
+            padding: 6px 4px;
+            text-align: center;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            font-size: 0.95em;
+            font-weight: bold;
+            outline: none;
+        }
+        .bid-input:focus { border-color: #4ecca3; }
+        .bid-input.has-value { border-color: #4ecca3; background: rgba(78, 204, 163, 0.1); }
+
+        .bottom-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0,0,0,0.9);
-            padding: 15px 30px;
+            background: rgba(15, 12, 41, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid #e94560;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 2px solid #e94560;
+            z-index: 100;
         }
-        .budget-bar { flex: 1; margin: 0 30px; }
-        .budget-bar-inner { height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .budget-bar-fill { height: 100%; background: linear-gradient(90deg, #4ecca3, #e94560); transition: width 0.3s; }
-        .budget-text { text-align: center; margin-top: 5px; font-size: 0.9em; }
+        .bottom-bar .stats {
+            display: flex;
+            gap: 24px;
+            font-size: 0.9em;
+        }
+        .bottom-bar .stats span { color: #888; }
+        .bottom-bar .stats strong { color: #4ecca3; }
         .submit-btn {
-            padding: 15px 40px;
-            font-size: 1.2em;
+            padding: 10px 40px;
+            font-size: 1.1em;
             background: #4ecca3;
-            color: #1a1a2e;
+            color: #111;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
         }
-        .submit-btn:disabled { background: #666; cursor: not-allowed; }
-        .status { padding: 5px 15px; border-radius: 15px; font-size: 0.8em; }
-        .status.ok { background: #4ecca3; color: #1a1a2e; }
-        .status.err { background: #e94560; }
-        .frozen .bid-input { pointer-events: none; opacity: 0.5; }
-        .frozen-banner {
-            display: none;
+        .submit-btn:hover { background: #3dbb92; }
+        .submit-btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .submit-btn.submitted { background: #666; }
+
+        .toast {
             position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #e94560;
-            padding: 30px 60px;
-            border-radius: 20px;
-            font-size: 2em;
-            font-weight: bold;
-            z-index: 1000;
+            top: 80px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            z-index: 300;
+            animation: slideIn 0.3s ease;
         }
-        .frozen .frozen-banner { display: block; }
+        .toast.success { background: #4ecca3; color: #111; }
+        .toast.error { background: #ff4444; color: #fff; }
+        .toast.info { background: #3498db; color: #fff; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 800px) {
+            .pots-grid { grid-template-columns: 1fr; }
+            .header { flex-wrap: wrap; gap: 8px; }
+            .header h1 { font-size: 1.1em; }
+        }
     </style>
 </head>
 <body>
-    <div class="login-screen" id="loginScreen">
-        <h1>🎯 Block Diagram Auction</h1>
-        <p style="color: #aaa; margin-bottom: 20px;">Crayfish Axon EPSP/IPSP Model</p>
-        <input type="text" id="teamNameInput" placeholder="Enter Team Name">
-        <button onclick="joinAuction()">Join Auction</button>
-    </div>
 
-    <div class="main-content" id="mainContent">
-        <div class="header">
-            <h1>🎯 Block Diagram Auction</h1>
-            <div class="header-info">
-                <div class="team-name" id="teamDisplay">Team</div>
-                <div class="budget-display">Budget: <span id="remainingBudget">100</span>/100</div>
-                <div class="timer" id="timer">15:00</div>
-                <div class="status err" id="status">Connecting...</div>
+<div class="login-screen" id="loginScreen">
+    <h1>🏏 Block Diagram Auction</h1>
+    <p>Studio 1 — Crayfish Axon Core Conductor Model</p>
+    <input type="text" id="teamNameInput" placeholder="Enter your team name" autofocus>
+    <button onclick="joinAuction()">Join Auction</button>
+</div>
+
+<div class="main-content" id="mainContent">
+    <div class="header">
+        <h1>🏏 Block Diagram Auction</h1>
+        <div class="header-info">
+            <div class="team-badge" id="teamBadge"></div>
+            <div class="budget-display">
+                Budget: <span class="amount ok" id="budgetDisplay">100</span> / 100
             </div>
+            <div class="timer" id="timer">15:00</div>
         </div>
-        <div class="sets-container" id="setsContainer"></div>
-        <div class="submit-section">
-            <div style="color: #888;">Allocated:</div>
-            <div class="budget-bar">
-                <div class="budget-bar-inner">
-                    <div class="budget-bar-fill" id="budgetBar" style="width: 0%"></div>
-                </div>
-                <div class="budget-text"><span id="allocatedPoints">0</span> / 100 points</div>
-            </div>
-            <button class="submit-btn" id="submitBtn" onclick="submitBids()">Update Bids</button>
-        </div>
-        <div class="frozen-banner">⏱️ AUCTION FROZEN!</div>
     </div>
+    <div class="pots-grid" id="potsGrid"></div>
+    <div class="bottom-bar">
+        <div class="stats">
+            <span>Items bid on: <strong id="itemCount">0</strong> / <span id="totalItems">51</span></span>
+            <span>Pots covered: <strong id="potsCovered">0</strong> / 8</span>
+            <span>Points used: <strong id="pointsUsed">0</strong> / 100</span>
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="submitBids()">Submit Bids</button>
+    </div>
+</div>
 
 <script>
+// ============================================
+// HARDCODED CONFIG
+// ============================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
 const BUDGET = 100;
-const DURATION = 15 * 60;
-const API = 'https://script.google.com/macros/s/AKfycbwbMIZyLuPD4kIDN0XJXfr4B1UDCcPwUkEtQon2lLWHqXUOpIzBgh4kFDxI9PFkrzM/exec';
+const TIMER_MINUTES = 15;
 
-const SETS = [
-    { id: "set1", name: "Set 1: Geometry", description: "Physical structure of the axon", items: [
-        { id: "a", name: "a", description: "Axon radius" },
-        { id: "b", name: "b", description: "Extracellular boundary radius" },
-        { id: "ri_eq", name: "r<sub>i</sub> = ρ<sub>i</sub>/πa²", description: "Intracellular resistance per unit length" },
-        { id: "ro_eq", name: "r<sub>o</sub> = ρ<sub>o</sub>/π(b²−a²)", description: "Extracellular resistance per unit length" }
-    ]},
-    { id: "set2", name: "Set 2: Passive Membrane", description: "Resting membrane properties", items: [
-        { id: "gleak", name: "g<sub>leak</sub>", description: "Leak conductance per unit length" },
-        { id: "Erest", name: "E<sub>rest</sub>", description: "Resting membrane potential" },
-        { id: "Kleak", name: "K<sub>leak</sub> = g<sub>leak</sub>(V<sub>m</sub> − E<sub>rest</sub>)", description: "Leak current" }
-    ]},
-    { id: "set3", name: "Set 3: Synaptic Input", description: "Synapse properties", items: [
-        { id: "gsyn", name: "g<sub>syn</sub>(t)", description: "Synaptic conductance" },
-        { id: "Esyn", name: "E<sub>syn</sub>", description: "Synaptic reversal potential" },
-        { id: "Ksyn", name: "K<sub>syn</sub> = g<sub>syn</sub>(V<sub>m</sub> − E<sub>syn</sub>)", description: "Synaptic current" }
-    ]},
-    { id: "set4", name: "Set 4: Ion Reversal Potentials", description: "Nernst potentials", items: [
-        { id: "ENa", name: "E<sub>Na</sub>", description: "Sodium reversal potential" },
-        { id: "EK", name: "E<sub>K</sub>", description: "Potassium reversal potential" },
-        { id: "ECl", name: "E<sub>Cl</sub>", description: "Chloride reversal potential" }
-    ]},
-    { id: "set5", name: "Set 5: EPSP Specification", description: "What makes an EPSP", items: [
-        { id: "Esyn_epsp", name: "E<sub>syn</sub> > E<sub>rest</sub>", description: "EPSP reversal constraint" },
-        { id: "df_epsp", name: "(V<sub>m</sub> − E<sub>syn</sub>) < 0", description: "Driving force negative" },
-        { id: "Ksyn_epsp", name: "K<sub>syn</sub> < 0 (inward)", description: "Current inward (sink)" }
-    ]},
-    { id: "set6", name: "Set 6: IPSP Specification", description: "What makes an IPSP", items: [
-        { id: "Esyn_ipsp", name: "E<sub>syn</sub> < E<sub>rest</sub>", description: "IPSP reversal constraint" },
-        { id: "df_ipsp", name: "(V<sub>m</sub> − E<sub>syn</sub>) > 0", description: "Driving force positive" },
-        { id: "Ksyn_ipsp", name: "K<sub>syn</sub> > 0 (outward)", description: "Current outward (source)" }
-    ]},
-    { id: "set7", name: "Set 7: Total Membrane Current", description: "Combining currents", items: [
-        { id: "Km_total", name: "K<sub>m</sub> = K<sub>leak</sub> + K<sub>syn</sub>", description: "Total membrane current" },
-        { id: "z0", name: "z<sub>0</sub>", description: "Synapse location" }
-    ]},
-    { id: "set8", name: "Set 8: Intracellular Domain", description: "Inside the axon", items: [
-        { id: "Ii", name: "I<sub>i</sub>", description: "Intracellular current" },
-        { id: "Vi", name: "V<sub>i</sub>", description: "Intracellular potential" },
-        { id: "dVi", name: "∂V<sub>i</sub>/∂z = −r<sub>i</sub>I<sub>i</sub>", description: "Ohm's law inside" }
-    ]},
-    { id: "set9", name: "Set 9: Extracellular Domain", description: "Outside the axon", items: [
-        { id: "Io", name: "I<sub>o</sub>", description: "Extracellular current" },
-        { id: "Vo", name: "V<sub>o</sub>", description: "Extracellular potential" },
-        { id: "dVo", name: "∂V<sub>o</sub>/∂z = −r<sub>o</sub>I<sub>o</sub>", description: "Ohm's law outside" }
-    ]},
-    { id: "set10", name: "Set 10: Current Conservation", description: "KCL constraints", items: [
-        { id: "dIi", name: "∂I<sub>i</sub>/∂z = −K<sub>m</sub>", description: "Intracellular continuity" },
-        { id: "dIo", name: "∂I<sub>o</sub>/∂z = K<sub>m</sub>", description: "Extracellular continuity" }
-    ]},
-    { id: "set11", name: "Set 11: Membrane Potential", description: "Voltage relationships", items: [
-        { id: "Vm_def", name: "V<sub>m</sub> = V<sub>i</sub> − V<sub>o</sub>", description: "Membrane potential definition" },
-        { id: "Vi_eq", name: "V<sub>i</sub> = V<sub>m</sub> + V<sub>o</sub>", description: "Intracellular relationship" }
-    ]},
-    { id: "set12", name: "Set 12: Governing Equation", description: "Core conductor equation", items: [
-        { id: "gov_eq", name: "∂²V<sub>m</sub>/∂z² = (r<sub>o</sub>+r<sub>i</sub>)K<sub>m</sub>", description: "Combined equation" }
-    ]},
-    { id: "set13", name: "Set 13: Intracellular Recording", description: "What electrode sees", items: [
-        { id: "intra_elec", name: "Intracellular electrode", description: "Measures V<sub>i</sub>" },
-        { id: "epsp_intra", name: "EPSP: V<sub>i</sub> ↑", description: "Depolarization" },
-        { id: "ipsp_intra", name: "IPSP: V<sub>i</sub> ↓", description: "Hyperpolarization" }
-    ]},
-    { id: "set14", name: "Set 14: Extracellular Recording", description: "What electrode sees", items: [
-        { id: "extra_elec", name: "Extracellular electrode", description: "Measures V<sub>o</sub>" },
-        { id: "epsp_extra", name: "EPSP: V<sub>o</sub> ↓", description: "Negative (sink)" },
-        { id: "ipsp_extra", name: "IPSP: V<sub>o</sub> ↑", description: "Positive (source)" }
-    ]},
-    { id: "set15", name: "Set 15: Key Constraints", description: "Critical constraints", items: [
-        { id: "ro_constraint", name: "r<sub>o</sub> > 0", description: "Required for extracellular signal" },
-        { id: "gsyn_constraint", name: "g<sub>syn</sub> > 0", description: "Required for synaptic current" }
-    ]},
-    { id: "set16", name: "Set 16: Signal Polarity", description: "Key insight", items: [
-        { id: "polarity", name: "ΔV<sub>o</sub> opposite to ΔV<sub>m</sub>", description: "Opposite polarity" },
-        { id: "ro_magnitude", name: "|ΔV<sub>o</sub>| depends on r<sub>o</sub>", description: "Larger r<sub>o</sub> = larger signal" }
-    ]}
+// ============================================
+// AUCTION DATA
+// ============================================
+const AUCTION_POTS = [
+  { id:"pot1", name:"Pot 1: Geometry", winnersPerItem:2, items:[
+    {id:"G1",name:"a (axon radius)",desc:"Intracellular cross-section dimension"},
+    {id:"G2",name:"b (extracellular boundary)",desc:"Extracellular cross-section dimension"},
+    {id:"G3",name:"ρᵢ (cytoplasm resistivity)",desc:"Material property of intracellular medium"},
+    {id:"G4",name:"ρₒ (extracellular resistivity)",desc:"Material property of extracellular medium"},
+    {id:"G5",name:"rᵢ = ρᵢ / πa²",desc:"Formula: geometry → rᵢ"},
+    {id:"G6",name:"rₒ = ρₒ / π(b²−a²)",desc:"Formula: geometry → rₒ"},
+    {id:"G7",name:"Micrometer + histology → a, b",desc:"Method: measure radii from tissue"},
+    {id:"G8",name:"Impedance → rᵢ, rₒ directly",desc:"Method: bypasses geometry"},
+  ]},
+  { id:"pot2", name:"Pot 2: Resting Membrane", winnersPerItem:3, items:[
+    {id:"R1",name:"g_leak (leak conductance)",desc:"How leaky the membrane is"},
+    {id:"R2",name:"E_rest (resting potential)",desc:"Equilibrium voltage"},
+    {id:"R3",name:"K_leak = g_leak(Vₘ − E_rest)",desc:"Leak current formula"},
+    {id:"R4",name:"At rest: Vₘ=E_rest → K_leak=0",desc:"Equilibrium condition"},
+    {id:"R5",name:"Current clamp → Rₘ",desc:"Method: inject I, measure ΔVₘ"},
+    {id:"R6",name:"Voltage clamp → g_leak",desc:"Method: command Vₘ, measure Iₘ"},
+  ]},
+  { id:"pot3", name:"Pot 3: Synapse", winnersPerItem:3, items:[
+    {id:"S1",name:"g_syn(t) (synaptic conductance)",desc:"Synapse on/off switch"},
+    {id:"S2",name:"E_syn (reversal potential)",desc:"Where driving force = 0"},
+    {id:"S3",name:"K_syn = g_syn(t)·(Vₘ − E_syn)",desc:"Synaptic current formula"},
+    {id:"S4",name:"g_syn(t) is transient",desc:"Rises then falls"},
+    {id:"S5",name:"Reversal potential expt → E_syn",desc:"Method: vary Vₘ, find I_syn=0"},
+    {id:"S6",name:"Paired recording → g_syn(t)",desc:"Method: stim pre, record post"},
+  ]},
+  { id:"pot4", name:"Pot 4: EPSP vs IPSP", winnersPerItem:2, items:[
+    {id:"E1",name:"E_syn(EPSP) > E_rest",desc:"Reversal above rest"},
+    {id:"E2",name:"E_syn(IPSP) < E_rest",desc:"Reversal below rest"},
+    {id:"E3",name:"EPSP: (Vₘ−E_syn) < 0",desc:"Negative driving force"},
+    {id:"E4",name:"IPSP: (Vₘ−E_syn) > 0",desc:"Positive driving force"},
+    {id:"E5",name:"EPSP: K_syn<0 → inward → sink",desc:"Current into cell"},
+    {id:"E6",name:"IPSP: K_syn>0 → outward → source",desc:"Current out of cell"},
+    {id:"E7",name:"EPSP channels: cation (Na⁺/K⁺)",desc:"Excitatory ion mechanism"},
+    {id:"E8",name:"IPSP channels: Cl⁻ (GABA)",desc:"Inhibitory ion mechanism"},
+  ]},
+  { id:"pot5", name:"Pot 5: Ohm's Law", winnersPerItem:2, items:[
+    {id:"O1",name:"Iᵢ (intracellular current)",desc:"Current inside axon"},
+    {id:"O2",name:"Iₒ (extracellular current)",desc:"Current outside axon"},
+    {id:"O3",name:"Vᵢ (intracellular potential)",desc:"Voltage inside"},
+    {id:"O4",name:"Vₒ (extracellular potential)",desc:"Voltage outside"},
+    {id:"O5",name:"∂Vᵢ/∂z = −rᵢIᵢ",desc:"Ohm's law intracellular"},
+    {id:"O6",name:"∂Vₒ/∂z = −rₒIₒ",desc:"Ohm's law extracellular"},
+    {id:"O7",name:"Current injection method",desc:"Pass known I, measure ΔV"},
+    {id:"O8",name:"Voltage gradient method",desc:"Measure V at two z positions"},
+  ]},
+  { id:"pot6", name:"Pot 6: KCL / Conservation", winnersPerItem:4, items:[
+    {id:"K1",name:"∂Iᵢ/∂z = −Kₘ",desc:"Intracellular current continuity"},
+    {id:"K2",name:"∂Iₒ/∂z = Kₘ",desc:"Extracellular current continuity"},
+    {id:"K3",name:"Kₘ = K_leak + K_syn",desc:"Total membrane current"},
+    {id:"K4",name:"Sink: Kₘ<0 → into cell",desc:"Inward current meaning"},
+    {id:"K5",name:"Source: Kₘ>0 → out of cell",desc:"Outward current meaning"},
+  ]},
+  { id:"pot7", name:"Pot 7: Membrane Potential", winnersPerItem:4, items:[
+    {id:"M1",name:"Vₘ = Vᵢ − Vₒ",desc:"Membrane potential definition"},
+    {id:"M2",name:"Vᵢ = Vₘ + Vₒ",desc:"What intracellular electrode measures"},
+    {id:"M3",name:"Differential recording → Vₘ",desc:"Method: simultaneous Vᵢ and Vₒ"},
+    {id:"M4",name:"Vᵢ ≈ Vₘ when rₒ ≪ rᵢ",desc:"Approximation & when it breaks"},
+  ]},
+  { id:"pot8", name:"Pot 8: Electrodes & Recording", winnersPerItem:3, items:[
+    {id:"L1",name:"Intracellular electrode → Vᵢ",desc:"Inside electrode"},
+    {id:"L2",name:"Extracellular electrode → Vₒ",desc:"Outside electrode"},
+    {id:"L3",name:"rₒ > 0 required for Vₒ",desc:"No signal if rₒ = 0"},
+    {id:"L4",name:"EPSP: Vᵢ↑, Vₒ↓",desc:"Opposite polarity (excitation)"},
+    {id:"L5",name:"IPSP: Vᵢ↓, Vₒ↑",desc:"Opposite polarity (inhibition)"},
+    {id:"L6",name:"|ΔVₒ| ∝ rₒ",desc:"Larger rₒ = larger signal"},
+  ]}
 ];
 
+// ============================================
+// STATE
+// ============================================
 let teamName = '';
 let bids = {};
-let allBids = {};
-let timeLeft = DURATION;
+let timerInterval = null;
+let timeRemaining = TIMER_MINUTES * 60;
+let submitted = false;
 
+// ============================================
+// LOGIN
+// ============================================
 function joinAuction() {
-    teamName = document.getElementById('teamNameInput').value.trim();
-    if (!teamName) { alert('Enter team name'); return; }
+    const name = document.getElementById('teamNameInput').value.trim();
+    if (!name) { showToast('Enter a team name', 'error'); return; }
+    teamName = name;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainContent').classList.add('active');
-    document.getElementById('teamDisplay').textContent = teamName;
-    renderSets();
+    document.getElementById('teamBadge').textContent = teamName;
+    renderPots();
     startTimer();
-    poll();
-    setInterval(poll, 3000);
 }
 
-function renderSets() {
-    const c = document.getElementById('setsContainer');
-    c.innerHTML = SETS.map(s => `
-        <div class="set-card">
-            <div class="set-header"><h3>${s.name}</h3><p>${s.description}</p></div>
-            <div class="set-items">
-                ${s.items.map(i => `
-                    <div class="item" id="item-${i.id}">
+document.getElementById('teamNameInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') joinAuction();
+});
+
+// ============================================
+// RENDER
+// ============================================
+function renderPots() {
+    const grid = document.getElementById('potsGrid');
+    grid.innerHTML = '';
+    AUCTION_POTS.forEach(pot => {
+        const card = document.createElement('div');
+        card.className = 'pot-card';
+        card.id = `card-${pot.id}`;
+        const winnersLabel = pot.winnersPerItem === 2 ? 'Top 2' :
+                             pot.winnersPerItem === 3 ? 'Top 3' : 'Top 4';
+        card.innerHTML = `
+            <div class="pot-header">
+                <h3>${pot.name}</h3>
+                <div class="pot-meta">
+                    <span>${pot.items.length} items</span>
+                    <span class="winners-badge">${winnersLabel} win</span>
+                </div>
+            </div>
+            <div class="pot-items">
+                ${pot.items.map(item => `
+                    <div class="item-row" id="row-${item.id}">
+                        <span class="item-id">${item.id}</span>
                         <div class="item-info">
-                            <div class="item-name">${i.name}</div>
-                            <div class="item-desc">${i.description}</div>
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-desc">${item.desc}</div>
                         </div>
-                        <div class="item-bidding">
-                            <div class="current-high">
-                                <div class="label">High</div>
-                                <div class="value" id="high-${i.id}">0</div>
-                                <div class="leader" id="leader-${i.id}">-</div>
-                            </div>
-                            <input type="number" class="bid-input" id="bid-${i.id}" min="0" value="0" onchange="updateBid('${i.id}',this.value)" onfocus="this.select()">
-                        </div>
+                        <input type="number" class="bid-input" id="bid-${item.id}"
+                            min="0" max="100" placeholder="0"
+                            data-item="${item.id}" data-pot="${pot.id}"
+                            onchange="updateBid(this)" oninput="updateBid(this)">
                     </div>
                 `).join('')}
             </div>
-        </div>
-    `).join('');
+        `;
+        grid.appendChild(card);
+    });
+    document.getElementById('totalItems').textContent =
+        AUCTION_POTS.reduce((s, p) => s + p.items.length, 0);
 }
 
-function updateBid(id, val) {
-    bids[id] = parseInt(val) || 0;
-    updateBudget();
-    updateStatus(id);
-}
-
-function updateBudget() {
-    const used = Object.values(bids).reduce((a,b) => a+b, 0);
-    document.getElementById('remainingBudget').textContent = BUDGET - used;
-    document.getElementById('allocatedPoints').textContent = used;
-    document.getElementById('budgetBar').style.width = used + '%';
-    document.getElementById('submitBtn').disabled = used > BUDGET;
-    document.getElementById('remainingBudget').style.color = used > BUDGET ? '#ff6b6b' : '#4ecca3';
-}
-
-function updateStatus(id) {
-    const el = document.getElementById('item-' + id);
-    if (!el) return;
-    const my = bids[id] || 0;
-    const hi = getHigh(id);
-    const lead = getLead(id);
-    el.classList.remove('has-bid','winning','outbid');
-    if (my > 0) {
-        el.classList.add('has-bid');
-        if (lead === teamName) el.classList.add('winning');
-        else if (my <= hi) el.classList.add('outbid');
+// ============================================
+// BID MANAGEMENT
+// ============================================
+function updateBid(input) {
+    const itemId = input.dataset.item;
+    const val = parseInt(input.value) || 0;
+    const row = document.getElementById(`row-${itemId}`);
+    if (val > 0) {
+        bids[itemId] = val;
+        input.classList.add('has-value');
+        row.classList.add('has-bid');
+    } else {
+        delete bids[itemId];
+        input.classList.remove('has-value');
+        row.classList.remove('has-bid');
     }
+    updateStats();
 }
 
-function getHigh(id) {
-    if (!allBids[id]) return 0;
-    return Math.max(...Object.values(allBids[id]), 0);
-}
+function updateStats() {
+    const totalSpent = Object.values(bids).reduce((s, v) => s + v, 0);
+    const itemsBidOn = Object.keys(bids).length;
+    const potsCovered = new Set();
+    AUCTION_POTS.forEach(pot => {
+        pot.items.forEach(item => {
+            if (bids[item.id]) potsCovered.add(pot.id);
+        });
+    });
 
-function getLead(id) {
-    if (!allBids[id]) return '-';
-    let max = 0, lead = '-';
-    for (const [t,b] of Object.entries(allBids[id])) {
-        if (b > max) { max = b; lead = t; }
-    }
-    return lead;
-}
+    document.getElementById('pointsUsed').textContent = totalSpent;
+    document.getElementById('itemCount').textContent = itemsBidOn;
+    document.getElementById('potsCovered').textContent = potsCovered.size;
 
-function submitBids() {
+    const budgetEl = document.getElementById('budgetDisplay');
+    const remaining = BUDGET - totalSpent;
+    budgetEl.textContent = remaining;
+    budgetEl.className = 'amount ' + (remaining < 0 ? 'over' : remaining < 15 ? 'warn' : 'ok');
+
+    AUCTION_POTS.forEach(pot => {
+        const card = document.getElementById(`card-${pot.id}`);
+        const hasBids = pot.items.some(item => bids[item.id]);
+        card.classList.toggle('has-bids', hasBids);
+    });
+
     const btn = document.getElementById('submitBtn');
-    btn.textContent = 'Saving...';
-    
-    // Create form and submit via hidden iframe
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = API;
-    form.target = 'submitFrame';
-    
-    const addField = (name, val) => {
-        const inp = document.createElement('input');
-        inp.type = 'hidden';
-        inp.name = name;
-        inp.value = val;
-        form.appendChild(inp);
-    };
-    
-    addField('action', 'submitBids');
-    addField('teamName', teamName);
-    addField('bids', JSON.stringify(bids));
-    
-    // Create iframe if doesn't exist
-    let iframe = document.getElementById('submitFrame');
-    if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'submitFrame';
-        iframe.name = 'submitFrame';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
+    if (submitted) {
+        btn.textContent = '✓ Submitted';
+        btn.disabled = true;
+        btn.classList.add('submitted');
+    } else if (totalSpent > BUDGET) {
+        btn.textContent = `Over budget by ${totalSpent - BUDGET}`;
+        btn.disabled = true;
+    } else if (totalSpent === 0) {
+        btn.textContent = 'No bids placed';
+        btn.disabled = true;
+    } else {
+        btn.textContent = `Submit Bids (${totalSpent} pts)`;
+        btn.disabled = false;
     }
-    
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    
-    setTimeout(() => {
-        btn.textContent = 'Update Bids';
-        poll(); // Refresh data
-    }, 2000);
 }
 
-function poll() {
-    // Use image ping + localStorage trick for cross-origin
-    // Actually, let's try a simple approach: just fetch and handle error gracefully
-    
-    const img = new Image();
-    const ts = Date.now();
-    
-    // We'll use the Google Apps Script with a callback parameter
-    // But since we can't get the response, we'll just trigger it and rely on the sheet
-    
-    // For reading, we need to use a workaround
-    // Let's try creating a script tag
-    
-    const script = document.createElement('script');
-    const cb = 'cb_' + ts;
-    
-    window[cb] = function(data) {
-        if (data && data.bids) {
-            allBids = data.bids;
-            refreshDisplay();
-            setStatus(true);
-        }
-        delete window[cb];
-    };
-    
-    script.src = API + '?action=getAllBids&callback=' + cb;
-    script.onload = () => setTimeout(() => script.remove(), 100);
-    script.onerror = () => {
-        setStatus(false);
-        script.remove();
-        delete window[cb];
-    };
-    
-    document.body.appendChild(script);
-}
-
-function refreshDisplay() {
-    SETS.forEach(s => s.items.forEach(i => {
-        const hEl = document.getElementById('high-' + i.id);
-        const lEl = document.getElementById('leader-' + i.id);
-        if (hEl) hEl.textContent = getHigh(i.id);
-        if (lEl) lEl.textContent = getLead(i.id);
-        updateStatus(i.id);
-    }));
-}
-
-function setStatus(ok) {
-    const el = document.getElementById('status');
-    el.textContent = ok ? 'Connected' : 'Offline';
-    el.className = 'status ' + (ok ? 'ok' : 'err');
-}
-
+// ============================================
+// TIMER
+// ============================================
 function startTimer() {
-    setInterval(() => {
-        if (timeLeft <= 0) {
-            document.getElementById('mainContent').classList.add('frozen');
-            document.getElementById('timer').textContent = 'FROZEN';
-            return;
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            if (!submitted) submitBids(true);
         }
-        timeLeft--;
-        const m = Math.floor(timeLeft / 60);
-        const s = timeLeft % 60;
-        document.getElementById('timer').textContent = m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
-        if (timeLeft < 120) document.getElementById('timer').classList.add('warning');
     }, 1000);
 }
 
+function updateTimerDisplay() {
+    const el = document.getElementById('timer');
+    const min = Math.floor(Math.max(0, timeRemaining) / 60);
+    const sec = Math.max(0, timeRemaining) % 60;
+    el.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+    if (timeRemaining <= 0) {
+        el.classList.add('expired');
+        el.classList.remove('warning');
+        el.textContent = "CLOSED";
+    } else if (timeRemaining <= 120) {
+        el.classList.add('warning');
+    }
+}
+
+// ============================================
+// SUBMIT
+// ============================================
+async function submitBids(auto = false) {
+    if (submitted) return;
+    const totalSpent = Object.values(bids).reduce((s, v) => s + v, 0);
+    if (totalSpent > BUDGET) {
+        showToast('Over budget! Remove some bids first.', 'error');
+        return;
+    }
+    if (totalSpent === 0 && !auto) {
+        showToast('Place at least one bid.', 'error');
+        return;
+    }
+
+    submitted = true;
+    updateStats();
+
+    const payload = {
+        action: 'submitBids',
+        team: teamName,
+        bids: bids,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        showToast('Submitting...', 'info');
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        showToast('Bids submitted!', 'success');
+    } catch (err) {
+        showToast('Bids saved locally (network issue)', 'info');
+        console.error('Submit error:', err);
+    }
+
+    localStorage.setItem(`auction_${teamName}`, JSON.stringify(payload));
+    document.querySelectorAll('.bid-input').forEach(input => input.disabled = true);
+}
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(msg, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
 document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none') joinAuction();
+    if (e.key === 'Enter' && e.target.classList.contains('bid-input')) {
+        const inputs = [...document.querySelectorAll('.bid-input')];
+        const idx = inputs.indexOf(e.target);
+        if (idx < inputs.length - 1) inputs[idx + 1].focus();
+    }
 });
 </script>
 </body>

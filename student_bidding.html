@@ -17,18 +17,27 @@
         }
         .login-screen h1 { color: #e94560; font-size: 2.2em; }
         .login-screen p { color: #aaa; margin-bottom: 10px; }
-        .login-screen input {
-            padding: 14px 28px; font-size: 1.1em; border: 2px solid #444;
-            border-radius: 10px; width: 320px; text-align: center;
-            background: rgba(255,255,255,0.05); color: #fff; outline: none;
+        .login-screen .team-select-label { color: #ccc; font-size: 1.1em; margin-top: 10px; }
+        .team-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+            max-width: 500px; width: 100%; padding: 0 20px;
         }
-        .login-screen input:focus { border-color: #e94560; }
-        .login-screen input::placeholder { color: #666; }
-        .login-screen button {
-            padding: 14px 50px; font-size: 1.1em; background: #e94560;
-            color: white; border: none; border-radius: 10px; cursor: pointer;
+        .team-btn {
+            padding: 16px 10px; font-size: 1.3em; font-weight: bold;
+            background: rgba(255,255,255,0.06); color: #ccc;
+            border: 2px solid #444; border-radius: 12px; cursor: pointer;
+            transition: all 0.2s;
         }
-        .login-screen button:hover { background: #d63050; }
+        .team-btn:hover { border-color: #e94560; color: #fff; background: rgba(233,69,96,0.15); transform: scale(1.05); }
+        .team-btn:active { transform: scale(0.95); }
+        .team-btn.selected { border-color: #e94560; background: #e94560; color: #fff; }
+        .join-btn {
+            padding: 14px 50px; font-size: 1.1em; background: #444;
+            color: #888; border: none; border-radius: 10px; cursor: not-allowed;
+            transition: all 0.2s; margin-top: 5px;
+        }
+        .join-btn.ready { background: #e94560; color: white; cursor: pointer; }
+        .join-btn.ready:hover { background: #d63050; }
 
         .main-content { display: none; padding: 15px; padding-bottom: 100px; }
         .main-content.active { display: block; }
@@ -165,8 +174,9 @@
     <div class="login-screen" id="loginScreen">
         <h1>🏏 Block Diagram Auction</h1>
         <p>Studio 1 — Crayfish Axon Core Conductor Model</p>
-        <input type="text" id="teamNameInput" placeholder="Enter Team Name" autofocus>
-        <button onclick="joinAuction()">Join Auction</button>
+        <div class="team-select-label">Select your team:</div>
+        <div class="team-grid" id="teamGrid"></div>
+        <button class="join-btn" id="joinBtn" onclick="joinAuction()">Select a team to join</button>
     </div>
 
     <div class="main-content" id="mainContent">
@@ -291,20 +301,74 @@ let timeLeft = DURATION;
 let timerInterval = null;
 let frozen = false;
 
+// --- TEAM NUMBERS (skip 13) ---
+const TEAM_NUMBERS = [1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,19];
+let selectedTeam = null;
+
+// Render team buttons
+(function renderTeamGrid() {
+    const grid = document.getElementById('teamGrid');
+    TEAM_NUMBERS.forEach(num => {
+        const btn = document.createElement('button');
+        btn.className = 'team-btn';
+        btn.textContent = num;
+        btn.onclick = function() {
+            document.querySelectorAll('.team-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedTeam = num;
+            const joinBtn = document.getElementById('joinBtn');
+            joinBtn.textContent = 'Join as Team ' + num;
+            joinBtn.classList.add('ready');
+        };
+        grid.appendChild(btn);
+    });
+})();
+
 // --- LOGIN ---
 function joinAuction() {
-    const name = document.getElementById('teamNameInput').value.trim();
-    if (!name) return;
-    teamName = name;
+    if (!selectedTeam) return;
+    teamName = 'Team ' + selectedTeam;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainContent').classList.add('active');
     document.getElementById('teamBadge').textContent = teamName;
     renderPots();
     startTimer();
-    poll();
+    // First poll loads existing bids (for multi-login sync)
+    pollAndSync();
     setInterval(poll, 2000);
 }
-document.getElementById('teamNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinAuction(); });
+
+// On first login, sync any existing bids this team already submitted
+function pollAndSync() {
+    var script = document.createElement('script');
+    var cb = 'cb_' + Date.now();
+    window[cb] = function(data) {
+        if (data && data.bids) {
+            allBids = data.bids;
+            // Load this team's existing bids into local state
+            POTS.forEach(function(pot) {
+                pot.items.forEach(function(item) {
+                    if (allBids[item.id] && allBids[item.id][teamName]) {
+                        var existing = allBids[item.id][teamName];
+                        if (existing > 0) {
+                            bids[item.id] = existing;
+                            var inp = document.getElementById('bid-' + item.id);
+                            if (inp) { inp.value = existing; inp.classList.add('has-value'); }
+                        }
+                    }
+                });
+            });
+            updateStats();
+            updateAllStatuses();
+            setStatus(true);
+        }
+        delete window[cb];
+        script.remove();
+    };
+    script.src = API + '?action=getAllBids&callback=' + cb;
+    script.onerror = function() { setStatus(false); script.remove(); delete window[cb]; };
+    document.body.appendChild(script);
+}
 
 // --- RENDER POTS ---
 function renderPots() {
@@ -550,6 +614,29 @@ function poll() {
     window[cb] = function(data) {
         if (data && data.bids) {
             allBids = data.bids;
+            // Sync: if a teammate submitted different bids, update local state
+            if (!frozen) {
+                POTS.forEach(function(pot) {
+                    pot.items.forEach(function(item) {
+                        var serverBid = (allBids[item.id] && allBids[item.id][teamName]) || 0;
+                        var localBid = bids[item.id] || 0;
+                        var inp = document.getElementById('bid-' + item.id);
+                        // Only overwrite if local hasn't been touched (input not focused)
+                        if (serverBid !== localBid && inp && document.activeElement !== inp) {
+                            if (serverBid > 0) {
+                                bids[item.id] = serverBid;
+                                inp.value = serverBid;
+                                inp.classList.add('has-value');
+                            } else if (localBid === 0) {
+                                delete bids[item.id];
+                                inp.value = '';
+                                inp.classList.remove('has-value');
+                            }
+                        }
+                    });
+                });
+                updateStats();
+            }
             updateAllStatuses();
             setStatus(true);
         }

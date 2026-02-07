@@ -9,9 +9,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
-            min-height: 100vh;
-            color: #fff;
-            padding: 20px;
+            min-height: 100vh; color: #fff; padding: 20px;
         }
         .header {
             display: flex; justify-content: space-between; align-items: center;
@@ -33,43 +31,10 @@
         }
         .timer-display.warning { color: #e94560; animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        .status { padding: 5px 15px; border-radius: 15px; font-size: 0.9em; margin-left: 20px; }
+        .status { padding: 5px 15px; border-radius: 15px; font-size: 0.9em; }
         .status.ok { background: #4ecca3; color: #1a1a2e; }
         .status.err { background: #e94560; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .panel {
-            background: rgba(255,255,255,0.05); border-radius: 15px;
-            padding: 20px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .panel h2 {
-            color: #e94560; margin-bottom: 15px;
-            padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .panel.full { grid-column: 1 / -1; }
-        .wanted-list { max-height: 400px; overflow-y: auto; }
-        .wanted-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px; margin: 8px 0; background: rgba(0,0,0,0.3);
-            border-radius: 8px; border-left: 4px solid #4ecca3;
-        }
-        .wanted-item .rank { font-size: 1.5em; font-weight: bold; color: #e94560; width: 40px; }
-        .wanted-item .info { flex: 1; margin-left: 15px; }
-        .wanted-item .name { font-weight: bold; }
-        .wanted-item .teams { font-size: 0.85em; color: #888; }
-        .wanted-item .total { font-size: 1.3em; font-weight: bold; color: #4ecca3; }
-        .bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 5px; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #4ecca3, #e94560); border-radius: 3px; }
-        .team-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px; max-height: 500px; overflow-y: auto;
-        }
-        .team-card {
-            background: rgba(0,0,0,0.3); border-radius: 10px;
-            padding: 15px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .team-card h3 { color: #4ecca3; margin-bottom: 10px; }
-        .team-card .stat { display: flex; justify-content: space-between; margin: 5px 0; font-size: 0.9em; }
-        .team-card .stat .label { color: #888; }
+
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .tab {
             padding: 10px 25px; background: rgba(255,255,255,0.1);
@@ -78,19 +43,69 @@
         .tab.active { background: #e94560; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .winners-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;
+
+        /* Pot grid (shared by live view and winners) */
+        .pot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        .pot-card {
+            background: rgba(255,255,255,0.04); border-radius: 12px;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.08);
         }
-        .winner-card {
-            background: rgba(78,204,163,0.1); border: 2px solid #4ecca3;
-            border-radius: 10px; padding: 15px; align-self: start;
+        .pot-card-header {
+            padding: 10px 14px; background: rgba(0,0,0,0.2);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .winner-card h4 { color: #4ecca3; margin-bottom: 10px; }
-        .winner-card .pot-rule { font-size: 0.8em; color: #888; margin-bottom: 8px; }
-        .winner-item { margin: 8px 0; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 5px; }
-        .winner-item .item-name { color: #888; font-size: 0.9em; }
-        .winner-item .winner-team { color: #e94560; font-weight: bold; }
-        .winner-item .winner-team.multi { color: #4ecca3; }
+        .pot-card-header h3 { color: #e94560; font-size: 0.95em; }
+        .pot-card-header .meta { font-size: 0.72em; color: #888; }
+        .pot-card-header .badge {
+            background: rgba(233,69,96,0.2); color: #e94560;
+            padding: 2px 7px; border-radius: 8px; font-weight: bold; font-size: 0.72em;
+        }
+        .pot-card-items { padding: 6px; }
+
+        /* Live view items */
+        .live-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 10px; margin: 3px 0; background: rgba(0,0,0,0.25);
+            border-radius: 7px; font-size: 0.85em;
+        }
+        .live-item .name { color: #ddd; }
+        .live-item .bid-count { font-weight: bold; min-width: 60px; text-align: right; }
+        .live-item .bid-count.hot { color: #e94560; }
+        .live-item .bid-count.warm { color: #ffc107; }
+        .live-item .bid-count.cold { color: #666; }
+
+        /* Winner items */
+        .winner-item {
+            padding: 6px 10px; margin: 3px 0; background: rgba(0,0,0,0.25);
+            border-radius: 7px; font-size: 0.85em;
+        }
+        .winner-item .item-label { color: #888; font-size: 0.85em; margin-bottom: 3px; }
+        .winner-item .winner-names { color: #4ecca3; font-weight: bold; }
+        .winner-item .no-bids { color: #555; }
+
+        /* Team grid */
+        .team-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px; max-height: 600px; overflow-y: auto;
+        }
+        .team-card {
+            background: rgba(0,0,0,0.3); border-radius: 10px;
+            padding: 15px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .team-card h3 { color: #4ecca3; margin-bottom: 10px; font-size: 1em; }
+        .team-card .stat { display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9em; }
+        .team-card .stat .label { color: #888; }
+        .panel {
+            background: rgba(255,255,255,0.05); border-radius: 15px;
+            padding: 20px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .panel h2 {
+            color: #e94560; margin-bottom: 15px;
+            padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @media (max-width: 1400px) { .pot-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1000px) { .pot-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
@@ -112,97 +127,78 @@
     </div>
 
     <div class="tab-content active" id="tab-live">
-        <div class="dashboard">
-            <div class="panel">
-                <h2>🔥 Most Wanted Items</h2>
-                <div class="wanted-list" id="mostWanted"></div>
-            </div>
-            <div class="panel">
-                <h2>❄️ Least Wanted Items</h2>
-                <div class="wanted-list" id="leastWanted"></div>
-            </div>
-            <div class="panel full">
-                <h2>👥 Teams Overview</h2>
-                <div class="team-grid" id="teamGrid"></div>
-            </div>
-        </div>
+        <div class="pot-grid" id="liveGrid"></div>
     </div>
 
     <div class="tab-content" id="tab-teams">
         <div class="panel">
             <h2>👥 Team Details</h2>
-            <div class="team-grid" id="teamGridFull"></div>
+            <div class="team-grid" id="teamGrid"></div>
         </div>
     </div>
 
     <div class="tab-content" id="tab-winners">
-        <div class="panel">
-            <h2>🏆 Auction Results</h2>
-            <p style="color:#888;margin-bottom:15px;">Variable winners per pot: Top 2 (8-item pots), Top 3 (6-item pots), Top 4 (4-5 item pots)</p>
-            <div class="winners-grid" id="winnersGrid"></div>
-        </div>
+        <div class="pot-grid" id="winnersGrid"></div>
     </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
-const DURATION = 15 * 60;
+var API = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
+var DURATION = 15 * 60;
 
-const POTS = [
-  { id:"pot1", name:"Pot 1: Geometry", winnersPerItem:2, items:[
-    {id:"G1",name:"a"},{id:"G2",name:"b"},{id:"G3",name:"ρᵢ"},{id:"G4",name:"ρₒ"},
-    {id:"G5",name:"rᵢ formula"},{id:"G6",name:"rₒ formula"},{id:"G7",name:"Micrometer"},{id:"G8",name:"Impedance"}
+var POTS = [
+  {id:"pot1",name:"Pot 1: Geometry",w:2,items:[
+    {id:"G1",name:"a"},{id:"G2",name:"b"},{id:"G3",name:"\u03C1i"},{id:"G4",name:"\u03C1o"},
+    {id:"G5",name:"ri formula"},{id:"G6",name:"ro formula"},{id:"G7",name:"Micrometer"},{id:"G8",name:"Impedance"}
   ]},
-  { id:"pot2", name:"Pot 2: Resting Membrane", winnersPerItem:3, items:[
+  {id:"pot2",name:"Pot 2: Resting Membrane",w:3,items:[
     {id:"R1",name:"g_leak"},{id:"R2",name:"E_rest"},{id:"R3",name:"K_leak formula"},
     {id:"R4",name:"Equilibrium"},{id:"R5",name:"Current clamp"},{id:"R6",name:"Voltage clamp"}
   ]},
-  { id:"pot3", name:"Pot 3: Synapse", winnersPerItem:3, items:[
+  {id:"pot3",name:"Pot 3: Synapse",w:3,items:[
     {id:"S1",name:"g_syn(t)"},{id:"S2",name:"E_syn"},{id:"S3",name:"K_syn formula"},
     {id:"S4",name:"Transient"},{id:"S5",name:"Reversal expt"},{id:"S6",name:"Paired recording"}
   ]},
-  { id:"pot4", name:"Pot 4: EPSP vs IPSP", winnersPerItem:2, items:[
-    {id:"E1",name:"E_syn &gt; E_rest"},{id:"E2",name:"E_syn &lt; E_rest"},{id:"E3",name:"EPSP DF &lt; 0"},
-    {id:"E4",name:"IPSP DF &gt; 0"},{id:"E5",name:"EPSP sink"},{id:"E6",name:"IPSP source"},
-    {id:"E7",name:"Cation ch"},{id:"E8",name:"Cl⁻ ch"}
+  {id:"pot4",name:"Pot 4: EPSP vs IPSP",w:2,items:[
+    {id:"E1",name:"E_syn > E_rest"},{id:"E2",name:"E_syn < E_rest"},{id:"E3",name:"EPSP DF<0"},
+    {id:"E4",name:"IPSP DF>0"},{id:"E5",name:"EPSP sink"},{id:"E6",name:"IPSP source"},
+    {id:"E7",name:"Cation ch"},{id:"E8",name:"Cl- ch"}
   ]},
-  { id:"pot5", name:"Pot 5: Ohm\u2019s Law", winnersPerItem:2, items:[
+  {id:"pot5",name:"Pot 5: Ohm's Law",w:2,items:[
     {id:"O1",name:"Ii"},{id:"O2",name:"Io"},{id:"O3",name:"Vi"},{id:"O4",name:"Vo"},
     {id:"O5",name:"dVi/dz"},{id:"O6",name:"dVo/dz"},{id:"O7",name:"Current inj"},{id:"O8",name:"V gradient"}
   ]},
-  { id:"pot6", name:"Pot 6: KCL", winnersPerItem:4, items:[
+  {id:"pot6",name:"Pot 6: KCL",w:4,items:[
     {id:"K1",name:"dIi/dz"},{id:"K2",name:"dIo/dz"},{id:"K3",name:"Km sum"},
     {id:"K4",name:"Sink"},{id:"K5",name:"Source"}
   ]},
-  { id:"pot7", name:"Pot 7: Membrane V", winnersPerItem:4, items:[
+  {id:"pot7",name:"Pot 7: Membrane V",w:4,items:[
     {id:"M1",name:"Vm=Vi-Vo"},{id:"M2",name:"Vi=Vm+Vo"},{id:"M3",name:"Diff recording"},{id:"M4",name:"Vi approx Vm"}
   ]},
-  { id:"pot8", name:"Pot 8: Electrodes", winnersPerItem:3, items:[
+  {id:"pot8",name:"Pot 8: Electrodes",w:3,items:[
     {id:"L1",name:"Intra electrode"},{id:"L2",name:"Extra electrode"},{id:"L3",name:"ro>0"},
     {id:"L4",name:"EPSP polarity"},{id:"L5",name:"IPSP polarity"},{id:"L6",name:"dVo prop ro"}
   ]}
 ];
 
-// Build item→pot lookup
-const ITEM_POT = {};
-POTS.forEach(pot => pot.items.forEach(item => { ITEM_POT[item.id] = pot; }));
+var ITEM_POT = {};
+POTS.forEach(function(pot) { pot.items.forEach(function(item) { ITEM_POT[item.id] = pot; }); });
 
-let allBids = {};
-let timeLeft = DURATION;
-let timerInterval = null;
-let running = false;
+var allBids = {};
+var timeLeft = DURATION;
+var timerInterval = null;
+var running = false;
 
 function showTab(name) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelector(`[onclick="showTab('${name}')"]`).classList.add('active');
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelector('[onclick="showTab(\'' + name + '\')"]').classList.add('active');
     document.getElementById('tab-' + name).classList.add('active');
-    if (name === 'winners') renderWinners();
 }
 
 function startAuction() {
     if (running) return;
     running = true;
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(function() {
         if (timeLeft <= 0) { freezeAuction(); return; }
         timeLeft--;
         updateTimer();
@@ -219,9 +215,9 @@ function freezeAuction() {
 
 function resetAuction() {
     if (!confirm('Reset auction? All bids will be cleared.')) return;
-    const script = document.createElement('script');
-    const cb = 'reset_' + Date.now();
-    window[cb] = function(data) {
+    var script = document.createElement('script');
+    var cb = 'reset_' + Date.now();
+    window[cb] = function() {
         alert('Auction reset!');
         allBids = {};
         timeLeft = DURATION;
@@ -237,16 +233,16 @@ function resetAuction() {
 }
 
 function updateTimer() {
-    const m = Math.floor(timeLeft / 60);
-    const s = timeLeft % 60;
+    var m = Math.floor(timeLeft / 60);
+    var s = timeLeft % 60;
     document.getElementById('timer').textContent = m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
     if (timeLeft < 120) document.getElementById('timer').classList.add('warning');
 }
 
-// --- POLLING (JSONP, every 2s) ---
+// --- POLLING ---
 function poll() {
-    const script = document.createElement('script');
-    const cb = 'cb_' + Date.now();
+    var script = document.createElement('script');
+    var cb = 'cb_' + Date.now();
     window[cb] = function(data) {
         if (data && data.bids) {
             allBids = data.bids;
@@ -257,124 +253,108 @@ function poll() {
         script.remove();
     };
     script.src = API + '?action=getAllBids&callback=' + cb;
-    script.onerror = () => { setStatus(false); script.remove(); delete window[cb]; };
+    script.onerror = function() { setStatus(false); script.remove(); delete window[cb]; };
     document.body.appendChild(script);
 }
 
 function setStatus(ok) {
-    const el = document.getElementById('status');
+    var el = document.getElementById('status');
     el.textContent = ok ? 'Connected' : 'Offline';
     el.className = 'status ' + (ok ? 'ok' : 'err');
 }
 
 function updateDisplays() {
-    renderMostWanted();
-    renderLeastWanted();
+    renderLiveGrid();
     renderTeamGrid();
+    renderWinners();
 }
 
-function getItemTotals() {
-    const totals = [];
-    POTS.forEach(pot => pot.items.forEach(item => {
-        const bids = allBids[item.id] || {};
-        const total = Object.values(bids).reduce((a,b) => a+b, 0);
-        const count = Object.values(bids).filter(b => b > 0).length;
-        totals.push({ id: item.id, name: item.name, total, count });
-    }));
-    return totals;
+// --- LIVE VIEW: 4-col pot grid with bid counts ---
+function renderLiveGrid() {
+    var grid = document.getElementById('liveGrid');
+    grid.innerHTML = POTS.map(function(pot) {
+        return '<div class="pot-card">' +
+            '<div class="pot-card-header">' +
+            '<h3>' + pot.name + '</h3>' +
+            '<span class="badge">Top ' + pot.w + '</span>' +
+            '</div>' +
+            '<div class="pot-card-items">' +
+            pot.items.map(function(item) {
+                var bids = allBids[item.id] || {};
+                var count = Object.values(bids).filter(function(b){return b > 0;}).length;
+                var cls = count >= 5 ? 'hot' : count >= 2 ? 'warm' : 'cold';
+                return '<div class="live-item">' +
+                    '<span class="name">' + item.id + ': ' + item.name + '</span>' +
+                    '<span class="bid-count ' + cls + '">' + count + ' team' + (count !== 1 ? 's' : '') + '</span>' +
+                    '</div>';
+            }).join('') +
+            '</div></div>';
+    }).join('');
 }
 
-function renderMostWanted() {
-    const c = document.getElementById('mostWanted');
-    const items = getItemTotals().sort((a,b) => b.total - a.total).slice(0, 10);
-    const max = items[0]?.total || 1;
-    c.innerHTML = items.map((item, i) => `
-        <div class="wanted-item">
-            <div class="rank">#${i+1}</div>
-            <div class="info">
-                <div class="name">${item.id}: ${item.name}</div>
-                <div class="teams">${item.count} teams bidding</div>
-                <div class="bar"><div class="bar-fill" style="width:${(item.total/max)*100}%"></div></div>
-            </div>
-            <div class="total">${item.total}</div>
-        </div>
-    `).join('') || '<p style="color:#888">No bids yet...</p>';
-}
-
-function renderLeastWanted() {
-    const c = document.getElementById('leastWanted');
-    const all = getItemTotals();
-    const items = all.sort((a,b) => a.total - b.total).slice(0, 10);
-    const max = Math.max(...all.map(i => i.total)) || 1;
-    c.innerHTML = items.map((item, i) => `
-        <div class="wanted-item">
-            <div class="rank">#${i+1}</div>
-            <div class="info">
-                <div class="name">${item.id}: ${item.name}</div>
-                <div class="teams">${item.count} teams bidding</div>
-                <div class="bar"><div class="bar-fill" style="width:${(item.total/max)*100}%"></div></div>
-            </div>
-            <div class="total">${item.total}</div>
-        </div>
-    `).join('') || '<p style="color:#888">No bids yet...</p>';
-}
-
+// --- TEAM GRID ---
 function renderTeamGrid() {
-    const teams = {};
-    Object.entries(allBids).forEach(([itemId, bids]) => {
-        Object.entries(bids).forEach(([team, amount]) => {
-            if (!teams[team]) teams[team] = { total: 0, items: 0, winning: 0, pots: new Set() };
-            if (amount > 0) {
-                teams[team].total += amount;
+    var teams = {};
+    Object.keys(allBids).forEach(function(itemId) {
+        var bids = allBids[itemId];
+        Object.keys(bids).forEach(function(team) {
+            if (!teams[team]) teams[team] = { total: 0, items: 0, winning: 0, pots: {} };
+            if (bids[team] > 0) {
+                teams[team].total += bids[team];
                 teams[team].items++;
-                if (ITEM_POT[itemId]) teams[team].pots.add(ITEM_POT[itemId].id);
+                if (ITEM_POT[itemId]) teams[team].pots[ITEM_POT[itemId].id] = true;
             }
         });
     });
 
-    // Count winning items (top N per pot)
-    POTS.forEach(pot => pot.items.forEach(item => {
-        const bids = allBids[item.id] || {};
-        const sorted = Object.entries(bids).sort((a,b) => b[1] - a[1]);
-        const winners = sorted.slice(0, pot.winnersPerItem).map(e => e[0]);
-        winners.forEach(w => { if (teams[w]) teams[w].winning++; });
-    }));
+    // Count winning
+    POTS.forEach(function(pot) {
+        pot.items.forEach(function(item) {
+            var bids = allBids[item.id] || {};
+            var sorted = Object.entries(bids).sort(function(a,b){return b[1]-a[1];});
+            var winners = sorted.slice(0, pot.w).map(function(e){return e[0];});
+            winners.forEach(function(w) { if (teams[w]) teams[w].winning++; });
+        });
+    });
 
-    const html = Object.entries(teams).map(([name, data]) => `
-        <div class="team-card">
-            <h3>${name}</h3>
-            <div class="stat"><span class="label">Points used:</span><span>${data.total}</span></div>
-            <div class="stat"><span class="label">Items bid:</span><span>${data.items}</span></div>
-            <div class="stat"><span class="label">Winning:</span><span>${data.winning}</span></div>
-            <div class="stat"><span class="label">Pots covered:</span><span>${data.pots.size}/8</span></div>
-        </div>
-    `).join('');
+    var html = Object.keys(teams).map(function(name) {
+        var d = teams[name];
+        var potCount = Object.keys(d.pots).length;
+        return '<div class="team-card">' +
+            '<h3>' + name + '</h3>' +
+            '<div class="stat"><span class="label">Points:</span><span>' + d.total + '</span></div>' +
+            '<div class="stat"><span class="label">Items bid:</span><span>' + d.items + '</span></div>' +
+            '<div class="stat"><span class="label">Winning:</span><span>' + d.winning + '</span></div>' +
+            '<div class="stat"><span class="label">Pots:</span><span>' + potCount + '/8</span></div>' +
+            '</div>';
+    }).join('');
 
     document.getElementById('teamGrid').innerHTML = html || '<p style="color:#888">No teams yet...</p>';
-    document.getElementById('teamGridFull').innerHTML = html || '<p style="color:#888">No teams yet...</p>';
 }
 
+// --- WINNERS: 4-col grid, team names only ---
 function renderWinners() {
-    const c = document.getElementById('winnersGrid');
-    c.innerHTML = POTS.map(pot => `
-        <div class="winner-card">
-            <h4>${pot.name}</h4>
-            <div class="pot-rule">Top ${pot.winnersPerItem} bidders win each item</div>
-            ${pot.items.map(item => {
-                const bids = allBids[item.id] || {};
-                const sorted = Object.entries(bids).sort((a,b) => b[1] - a[1]);
-                const winners = sorted.slice(0, pot.winnersPerItem);
-                return `
-                    <div class="winner-item">
-                        <div class="item-name">${item.id}: ${item.name}</div>
-                        ${winners.length > 0 ? winners.map(([team, amt]) =>
-                            `<div class="winner-team multi">${team} <span style="color:#888;font-size:0.8em">(${amt}pts)</span></div>`
-                        ).join('') : '<div class="winner-team" style="color:#666">No bids</div>'}
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `).join('');
+    var grid = document.getElementById('winnersGrid');
+    grid.innerHTML = POTS.map(function(pot) {
+        return '<div class="pot-card">' +
+            '<div class="pot-card-header">' +
+            '<h3>' + pot.name + '</h3>' +
+            '<span class="badge">Top ' + pot.w + '</span>' +
+            '</div>' +
+            '<div class="pot-card-items">' +
+            pot.items.map(function(item) {
+                var bids = allBids[item.id] || {};
+                var sorted = Object.entries(bids).sort(function(a,b){return b[1]-a[1];});
+                var winners = sorted.slice(0, pot.w).map(function(e){return e[0];});
+                return '<div class="winner-item">' +
+                    '<div class="item-label">' + item.id + ': ' + item.name + '</div>' +
+                    (winners.length > 0 ?
+                        '<div class="winner-names">' + winners.join(', ') + '</div>' :
+                        '<div class="no-bids">No bids</div>') +
+                    '</div>';
+            }).join('') +
+            '</div></div>';
+    }).join('');
 }
 
 // Init

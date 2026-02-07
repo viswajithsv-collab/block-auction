@@ -147,36 +147,36 @@ var DURATION = 15 * 60;
 
 var POTS = [
   {id:"pot1",name:"Pot 1: Geometry",w:2,items:[
-    {id:"G1",name:"a"},{id:"G2",name:"b"},{id:"G3",name:"\u03C1i"},{id:"G4",name:"\u03C1o"},
-    {id:"G5",name:"ri formula"},{id:"G6",name:"ro formula"},{id:"G7",name:"Micrometer"},{id:"G8",name:"Impedance"}
+    {id:"G1",name:"a (axon radius)"},{id:"G2",name:"b (outer boundary)"},{id:"G3",name:"\u03C1\u1D62 (cytoplasm resistivity)"},{id:"G4",name:"\u03C1\u2092 (extracellular resistivity)"},
+    {id:"G5",name:"r\u1D62 = \u03C1\u1D62 / \u03C0a\u00B2"},{id:"G6",name:"r\u2092 = \u03C1\u2092 / \u03C0(b\u00B2\u2212a\u00B2)"},{id:"G7",name:"Micrometer \u2192 a, b"},{id:"G8",name:"Impedance \u2192 r\u1D62, r\u2092"}
   ]},
   {id:"pot2",name:"Pot 2: Resting Membrane",w:3,items:[
-    {id:"R1",name:"g_leak"},{id:"R2",name:"E_rest"},{id:"R3",name:"K_leak formula"},
-    {id:"R4",name:"Equilibrium"},{id:"R5",name:"Current clamp"},{id:"R6",name:"Voltage clamp"}
+    {id:"R1",name:"g_leak (leak conductance)"},{id:"R2",name:"E_rest (resting potential)"},{id:"R3",name:"K_leak = g_leak(V\u2098 \u2212 E_rest)"},
+    {id:"R4",name:"At rest: V\u2098 = E_rest, K_leak = 0"},{id:"R5",name:"Current clamp \u2192 R\u2098"},{id:"R6",name:"Voltage clamp \u2192 g_leak"}
   ]},
   {id:"pot3",name:"Pot 3: Synapse",w:3,items:[
-    {id:"S1",name:"g_syn(t)"},{id:"S2",name:"E_syn"},{id:"S3",name:"K_syn formula"},
-    {id:"S4",name:"Transient"},{id:"S5",name:"Reversal expt"},{id:"S6",name:"Paired recording"}
+    {id:"S1",name:"g_syn(t) (synaptic conductance)"},{id:"S2",name:"E_syn (reversal potential)"},{id:"S3",name:"K_syn = g_syn(t)\u00B7(V\u2098 \u2212 E_syn)"},
+    {id:"S4",name:"g_syn(t) is transient"},{id:"S5",name:"Reversal potential expt"},{id:"S6",name:"Paired recording"}
   ]},
   {id:"pot4",name:"Pot 4: EPSP vs IPSP",w:2,items:[
-    {id:"E1",name:"E_syn > E_rest"},{id:"E2",name:"E_syn < E_rest"},{id:"E3",name:"EPSP DF<0"},
-    {id:"E4",name:"IPSP DF>0"},{id:"E5",name:"EPSP sink"},{id:"E6",name:"IPSP source"},
-    {id:"E7",name:"Cation ch"},{id:"E8",name:"Cl- ch"}
+    {id:"E1",name:"E_syn(EPSP) > E_rest"},{id:"E2",name:"E_syn(IPSP) < E_rest"},{id:"E3",name:"EPSP: (V\u2098 \u2212 E_syn) < 0"},
+    {id:"E4",name:"IPSP: (V\u2098 \u2212 E_syn) > 0"},{id:"E5",name:"EPSP \u2192 K_syn < 0 (sink)"},
+    {id:"E6",name:"IPSP \u2192 K_syn > 0 (source)"},{id:"E7",name:"Cation channels (Na\u207A/K\u207A)"},{id:"E8",name:"Cl\u207B channels"}
   ]},
-  {id:"pot5",name:"Pot 5: Ohm's Law",w:2,items:[
-    {id:"O1",name:"Ii"},{id:"O2",name:"Io"},{id:"O3",name:"Vi"},{id:"O4",name:"Vo"},
-    {id:"O5",name:"dVi/dz"},{id:"O6",name:"dVo/dz"},{id:"O7",name:"Current inj"},{id:"O8",name:"V gradient"}
+  {id:"pot5",name:"Pot 5: Ohm\u2019s Law",w:2,items:[
+    {id:"O1",name:"I\u1D62 (intracellular current)"},{id:"O2",name:"I\u2092 (extracellular current)"},{id:"O3",name:"V\u1D62 (intracellular potential)"},{id:"O4",name:"V\u2092 (extracellular potential)"},
+    {id:"O5",name:"\u2202V\u1D62/\u2202z = \u2212r\u1D62I\u1D62"},{id:"O6",name:"\u2202V\u2092/\u2202z = \u2212r\u2092I\u2092"},{id:"O7",name:"Current injection method"},{id:"O8",name:"Voltage gradient method"}
   ]},
   {id:"pot6",name:"Pot 6: KCL",w:4,items:[
-    {id:"K1",name:"dIi/dz"},{id:"K2",name:"dIo/dz"},{id:"K3",name:"Km sum"},
-    {id:"K4",name:"Sink"},{id:"K5",name:"Source"}
+    {id:"K1",name:"\u2202I\u1D62/\u2202z = \u2212K\u2098"},{id:"K2",name:"\u2202I\u2092/\u2202z = K\u2098"},
+    {id:"K3",name:"K\u2098 = K_leak + K_syn"},{id:"K4",name:"Sink: K\u2098 < 0 (inward)"},{id:"K5",name:"Source: K\u2098 > 0 (outward)"}
   ]},
   {id:"pot7",name:"Pot 7: Membrane V",w:4,items:[
-    {id:"M1",name:"Vm=Vi-Vo"},{id:"M2",name:"Vi=Vm+Vo"},{id:"M3",name:"Diff recording"},{id:"M4",name:"Vi approx Vm"}
+    {id:"M1",name:"V\u2098 = V\u1D62 \u2212 V\u2092"},{id:"M2",name:"V\u1D62 = V\u2098 + V\u2092"},{id:"M3",name:"Differential recording"},{id:"M4",name:"V\u1D62 \u2248 V\u2098 when r\u2092 \u226A r\u1D62"}
   ]},
   {id:"pot8",name:"Pot 8: Electrodes",w:3,items:[
-    {id:"L1",name:"Intra electrode"},{id:"L2",name:"Extra electrode"},{id:"L3",name:"ro>0"},
-    {id:"L4",name:"EPSP polarity"},{id:"L5",name:"IPSP polarity"},{id:"L6",name:"dVo prop ro"}
+    {id:"L1",name:"Intracellular electrode \u2192 V\u1D62"},{id:"L2",name:"Extracellular electrode \u2192 V\u2092"},{id:"L3",name:"r\u2092 > 0 required for V\u2092 signal"},
+    {id:"L4",name:"EPSP: V\u1D62 \u2191, V\u2092 \u2193"},{id:"L5",name:"IPSP: V\u1D62 \u2193, V\u2092 \u2191"},{id:"L6",name:"\u0394V\u2092 \u221D r\u2092"}
   ]}
 ];
 

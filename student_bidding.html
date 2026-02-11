@@ -39,6 +39,37 @@
         .join-btn.ready { background: #e94560; color: white; cursor: pointer; }
         .join-btn.ready:hover { background: #d63050; }
 
+        /* WAITING SCREEN — shown after login, before instructor starts */
+        .waiting-screen {
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; height: 100vh; gap: 20px;
+        }
+        .waiting-screen.active { display: flex; }
+        .waiting-screen h2 { color: #e94560; font-size: 1.8em; }
+        .waiting-screen p { color: #888; font-size: 1.1em; }
+        .waiting-screen .team-badge-large {
+            background: #e94560; padding: 8px 24px; border-radius: 15px;
+            font-weight: bold; font-size: 1.1em;
+        }
+        .waiting-pulse {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(233,69,96,0.2); position: relative;
+        }
+        .waiting-pulse::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%); width: 20px; height: 20px;
+            border-radius: 50%; background: #e94560;
+            animation: waitPulse 2s infinite;
+        }
+        @keyframes waitPulse {
+            0% { box-shadow: 0 0 0 0 rgba(233,69,96,0.6); }
+            70% { box-shadow: 0 0 0 25px rgba(233,69,96,0); }
+            100% { box-shadow: 0 0 0 0 rgba(233,69,96,0); }
+        }
+        .waiting-status { padding: 4px 12px; border-radius: 12px; font-size: 0.8em; }
+        .waiting-status.ok { background: #4ecca3; color: #1a1a2e; }
+        .waiting-status.err { background: #e94560; }
+
         .main-content { display: none; padding: 15px; padding-bottom: 100px; }
         .main-content.active { display: block; }
 
@@ -171,6 +202,7 @@
     </style>
 </head>
 <body>
+    <!-- SCREEN 1: Team Selection -->
     <div class="login-screen" id="loginScreen">
         <h1>🏏 Block Diagram Auction</h1>
         <p>Studio 1 — Crayfish Axon Core Conductor Model</p>
@@ -179,6 +211,16 @@
         <button class="join-btn" id="joinBtn" onclick="joinAuction()">Select a team to join</button>
     </div>
 
+    <!-- SCREEN 2: Waiting for Instructor to Start -->
+    <div class="waiting-screen" id="waitingScreen">
+        <span class="team-badge-large" id="waitingTeamBadge"></span>
+        <div class="waiting-pulse"></div>
+        <h2>Waiting for instructor to start the auction...</h2>
+        <p>You're all set! The bidding will begin when your instructor clicks Start.</p>
+        <span class="waiting-status ok" id="waitingStatus">Connected</span>
+    </div>
+
+    <!-- SCREEN 3: Bidding Interface -->
     <div class="main-content" id="mainContent">
         <div class="header">
             <h1>🏏 Block Diagram Auction</h1>
@@ -189,12 +231,10 @@
             </div>
         </div>
 
-        <!-- Bidding view -->
         <div class="bidding-view" id="biddingView">
             <div class="pots-grid" id="potsGrid"></div>
         </div>
 
-        <!-- Results view (hidden until shown) -->
         <div class="results-view" id="resultsView">
             <div class="results-summary" id="resultsSummary"></div>
             <div class="results-grid" id="resultsGrid"></div>
@@ -216,11 +256,11 @@
     </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
-const BUDGET = 100;
-const DURATION = 15 * 60;
+var API = 'https://script.google.com/macros/s/AKfycbzkDs0CuxWXFru1w_AjoJ8r5TvyUNw4MSO50BwlSHDURR5Qv66_MDQXa_T2fU1RnBs/exec';
+var BUDGET = 100;
+var DURATION = 15 * 60; // Will be overwritten by server state
 
-const POTS = [
+var POTS = [
   { id:"pot1", name:"Pot 1: Geometry", winnersPerItem:2, items:[
     {id:"G1",name:"a (axon radius)",desc:"Intracellular cross-section dimension"},
     {id:"G2",name:"b (extracellular boundary)",desc:"Extracellular cross-section dimension"},
@@ -291,32 +331,35 @@ const POTS = [
 ];
 
 // Build item lookup
-const ITEM_POT = {};
-POTS.forEach(pot => pot.items.forEach(item => { ITEM_POT[item.id] = pot; }));
+var ITEM_POT = {};
+POTS.forEach(function(pot) { pot.items.forEach(function(item) { ITEM_POT[item.id] = pot; }); });
 
-let teamName = '';
-let bids = {};
-let allBids = {};
-let timeLeft = DURATION;
-let timerInterval = null;
-let frozen = false;
+var teamName = '';
+var bids = {};
+var allBids = {};
+var frozen = false;
+
+// Auction state from server
+var auctionState = 'waiting'; // 'waiting', 'running', 'frozen'
+var serverStartTime = 0;
+var hasJoined = false; // Has the student selected a team?
 
 // --- TEAM NUMBERS (skip 13) ---
-const TEAM_NUMBERS = [1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,19];
-let selectedTeam = null;
+var TEAM_NUMBERS = [1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,19];
+var selectedTeam = null;
 
 // Render team buttons
 (function renderTeamGrid() {
-    const grid = document.getElementById('teamGrid');
-    TEAM_NUMBERS.forEach(num => {
-        const btn = document.createElement('button');
+    var grid = document.getElementById('teamGrid');
+    TEAM_NUMBERS.forEach(function(num) {
+        var btn = document.createElement('button');
         btn.className = 'team-btn';
         btn.textContent = num;
         btn.onclick = function() {
-            document.querySelectorAll('.team-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.team-btn').forEach(function(b) { b.classList.remove('selected'); });
             btn.classList.add('selected');
             selectedTeam = num;
-            const joinBtn = document.getElementById('joinBtn');
+            var joinBtn = document.getElementById('joinBtn');
             joinBtn.textContent = 'Join as Team ' + num;
             joinBtn.classList.add('ready');
         };
@@ -324,21 +367,386 @@ let selectedTeam = null;
     });
 })();
 
-// --- LOGIN ---
+// =============================================
+// LOGIN — just selects team, does NOT start timer
+// =============================================
+
 function joinAuction() {
     if (!selectedTeam) return;
     teamName = 'Team ' + selectedTeam;
+    hasJoined = true;
+
+    // Hide login screen
     document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainContent').classList.add('active');
-    document.getElementById('teamBadge').textContent = teamName;
-    renderPots();
-    startTimer();
-    // First poll loads existing bids (for multi-login sync)
-    pollAndSync();
-    setInterval(poll, 2000);
+
+    // Check current auction state to decide what screen to show
+    if (auctionState === 'running') {
+        showBiddingScreen();
+    } else if (auctionState === 'frozen') {
+        showBiddingScreen();
+        freeze();
+    } else {
+        // Show waiting screen
+        showWaitingScreen();
+    }
 }
 
-// On first login, sync any existing bids this team already submitted
+function showWaitingScreen() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('waitingScreen').classList.add('active');
+    document.getElementById('mainContent').classList.remove('active');
+    document.getElementById('waitingTeamBadge').textContent = teamName;
+}
+
+function showBiddingScreen() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('waitingScreen').classList.remove('active');
+    document.getElementById('mainContent').classList.add('active');
+    document.getElementById('teamBadge').textContent = teamName;
+
+    // Only render pots once
+    if (!document.getElementById('potsGrid').hasChildNodes()) {
+        renderPots();
+    }
+
+    // Load existing bids for this team
+    pollAndSync();
+}
+
+// =============================================
+// STATE POLLING — syncs auction state from server
+// =============================================
+
+function pollState() {
+    var script = document.createElement('script');
+    var cb = 'st_' + Date.now();
+    window[cb] = function(data) {
+        if (data && data.success) {
+            var newState = data.state || 'waiting';
+            var newStart = Number(data.startTime) || 0;
+            var newDuration = Number(data.duration) || 900;
+
+            var stateChanged = (newState !== auctionState);
+            auctionState = newState;
+            serverStartTime = newStart;
+            DURATION = newDuration;
+
+            // Update waiting screen connection indicator
+            var wStatus = document.getElementById('waitingStatus');
+            if (wStatus) {
+                wStatus.textContent = 'Connected';
+                wStatus.className = 'waiting-status ok';
+            }
+
+            if (stateChanged && hasJoined) {
+                handleStateChange();
+            }
+        }
+        delete window[cb];
+        script.remove();
+    };
+    script.src = API + '?action=getState&callback=' + cb;
+    script.onerror = function() {
+        var wStatus = document.getElementById('waitingStatus');
+        if (wStatus) {
+            wStatus.textContent = 'Offline';
+            wStatus.className = 'waiting-status err';
+        }
+        script.remove();
+        delete window[cb];
+    };
+    document.body.appendChild(script);
+}
+
+function handleStateChange() {
+    if (auctionState === 'running') {
+        // Instructor started! Transition to bidding screen
+        if (!frozen) {
+            showBiddingScreen();
+        }
+    } else if (auctionState === 'frozen') {
+        // Instructor froze! Lock bids
+        if (!frozen) {
+            doSubmit(); // Auto-submit whatever they have
+            freeze();
+        }
+    } else if (auctionState === 'waiting') {
+        // Auction was reset — go back to waiting
+        frozen = false;
+        bids = {};
+        allBids = {};
+        showWaitingScreen();
+    }
+}
+
+// =============================================
+// TIMER — calculated from server start time
+// =============================================
+
+function updateTimerDisplay() {
+    if (auctionState !== 'running' || !serverStartTime) return;
+    var elapsed = Math.floor((Date.now() - serverStartTime) / 1000);
+    var remaining = Math.max(0, DURATION - elapsed);
+
+    var m = Math.floor(remaining / 60);
+    var s = remaining % 60;
+    var el = document.getElementById('timer');
+    if (!el) return;
+    el.textContent = m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+
+    if (remaining < 120) el.classList.add('warning');
+    else el.classList.remove('warning');
+
+    // If time runs out client-side, auto-submit and freeze
+    // (The instructor dashboard or server will also freeze, but this ensures the student side locks too)
+    if (remaining <= 0 && !frozen) {
+        doSubmit();
+        freeze();
+    }
+}
+
+// =============================================
+// RENDER POTS
+// =============================================
+
+function renderPots() {
+    var grid = document.getElementById('potsGrid');
+    grid.innerHTML = '';
+    POTS.forEach(function(pot) {
+        var wLabel = 'Top ' + pot.winnersPerItem + ' win';
+        var card = document.createElement('div');
+        card.className = 'pot-card';
+        card.innerHTML =
+            '<div class="pot-header">' +
+                '<h3>' + pot.name + '</h3>' +
+                '<div class="pot-meta">' +
+                    '<span>' + pot.items.length + ' items</span>' +
+                    '<span class="winners-badge">' + wLabel + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="pot-items">' +
+                pot.items.map(function(item) {
+                    return '<div class="item-row" id="item-' + item.id + '">' +
+                        '<span class="item-id">' + item.id + '</span>' +
+                        '<div class="item-info">' +
+                            '<div class="item-name">' + item.name + '</div>' +
+                            '<div class="item-desc">' + item.desc + '</div>' +
+                        '</div>' +
+                        '<div class="item-status">' +
+                            '<span id="high-' + item.id + '">\u2014</span>' +
+                        '</div>' +
+                        '<input type="number" class="bid-input" id="bid-' + item.id + '"' +
+                            ' min="0" max="100" placeholder="0"' +
+                            ' data-item="' + item.id + '"' +
+                            ' onchange="updateBid(this)" oninput="updateBid(this)">' +
+                    '</div>';
+                }).join('') +
+            '</div>';
+        grid.appendChild(card);
+    });
+}
+
+// =============================================
+// BID MANAGEMENT
+// =============================================
+
+function updateBid(input) {
+    if (frozen) return;
+    var id = input.dataset.item;
+    var val = parseInt(input.value) || 0;
+    if (val > 0) { bids[id] = val; input.classList.add('has-value'); }
+    else { delete bids[id]; input.classList.remove('has-value'); }
+    updateStats();
+    updateAllStatuses();
+}
+
+function updateStats() {
+    var used = Object.values(bids).reduce(function(s,v){return s+v;}, 0);
+    var count = Object.keys(bids).length;
+    var pots = new Set();
+    POTS.forEach(function(pot) { pot.items.forEach(function(item) { if (bids[item.id]) pots.add(pot.id); }); });
+    var usedEl = document.getElementById('pointsUsed');
+    if (!usedEl) return;
+    usedEl.textContent = used;
+    usedEl.className = used > BUDGET ? 'over' : '';
+    document.getElementById('itemCount').textContent = count;
+    document.getElementById('potsCovered').textContent = pots.size;
+    var submitBtn = document.getElementById('submitBtn');
+    var finalBtn = document.getElementById('finalBtn');
+    if (submitBtn) submitBtn.disabled = used > BUDGET;
+    if (finalBtn) finalBtn.disabled = used > BUDGET || used === 0;
+}
+
+function getTopN(itemId, n) {
+    if (!allBids[itemId]) return [];
+    return Object.entries(allBids[itemId])
+        .sort(function(a,b) { return b[1] - a[1]; })
+        .slice(0, n)
+        .map(function(e) { return e[0]; });
+}
+
+function getHighBid(itemId) {
+    if (!allBids[itemId]) return 0;
+    return Math.max.apply(null, Object.values(allBids[itemId]).concat([0]));
+}
+
+function updateAllStatuses() {
+    POTS.forEach(function(pot) { pot.items.forEach(function(item) {
+        var row = document.getElementById('item-' + item.id);
+        var highEl = document.getElementById('high-' + item.id);
+        if (!row) return;
+        var myBid = bids[item.id] || 0;
+        var high = getHighBid(item.id);
+        var winners = getTopN(item.id, pot.winnersPerItem);
+        highEl.innerHTML = high > 0 ? '<span class="high">' + high + '</span>' : '\u2014';
+        row.classList.remove('has-bid','winning','outbid');
+        if (myBid > 0) {
+            row.classList.add('has-bid');
+            if (winners.indexOf(teamName) >= 0) row.classList.add('winning');
+            else row.classList.add('outbid');
+        }
+    }); });
+}
+
+// =============================================
+// SUBMIT
+// =============================================
+
+function submitBids() {
+    if (frozen) return;
+    var btn = document.getElementById('submitBtn');
+    if (btn) btn.textContent = 'Saving...';
+    doSubmit();
+    setTimeout(function() { if (btn) btn.textContent = 'Update Bids'; poll(); }, 2000);
+}
+
+function finalSubmit() {
+    if (frozen) return;
+    var used = Object.values(bids).reduce(function(s,v){return s+v;}, 0);
+    if (used > BUDGET) { alert('Over budget!'); return; }
+    if (used === 0) { alert('Place at least one bid.'); return; }
+    if (!confirm('Lock in your final bids? You will NOT be able to change them.')) return;
+    doSubmit();
+    freeze();
+}
+
+function freeze() {
+    frozen = true;
+    var main = document.getElementById('mainContent');
+    if (main) main.classList.add('frozen');
+    var timer = document.getElementById('timer');
+    if (timer) {
+        timer.textContent = 'LOCKED';
+        timer.classList.add('warning');
+    }
+}
+
+function doSubmit() {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = API;
+    form.target = 'submitFrame';
+    function addField(name, val) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = name; inp.value = val;
+        form.appendChild(inp);
+    }
+    addField('action', 'submitBids');
+    addField('teamName', teamName);
+    addField('bids', JSON.stringify(bids));
+    var iframe = document.getElementById('submitFrame');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'submitFrame'; iframe.name = 'submitFrame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// =============================================
+// RESULTS VIEW
+// =============================================
+
+function showResults() {
+    document.getElementById('biddingView').classList.add('hidden');
+    document.getElementById('resultsView').classList.add('active');
+    document.getElementById('resultsBtn').style.display = 'none';
+    document.getElementById('backBtn').style.display = 'inline-block';
+    renderResults();
+}
+
+function showBidding() {
+    document.getElementById('biddingView').classList.remove('hidden');
+    document.getElementById('resultsView').classList.remove('active');
+    document.getElementById('resultsBtn').style.display = 'inline-block';
+    document.getElementById('backBtn').style.display = 'none';
+}
+
+function renderResults() {
+    var wonItems = [];
+    var lostItems = [];
+    var coveredPots = new Set();
+
+    POTS.forEach(function(pot) {
+        pot.items.forEach(function(item) {
+            var winners = getTopN(item.id, pot.winnersPerItem);
+            if (bids[item.id] && winners.indexOf(teamName) >= 0) {
+                wonItems.push(item.id);
+                coveredPots.add(pot.id);
+            } else if (bids[item.id]) {
+                lostItems.push(item.id);
+            }
+        });
+    });
+
+    var missingPots = POTS.filter(function(p) { return !coveredPots.has(p.id); });
+
+    document.getElementById('resultsSummary').innerHTML =
+        '<h2>Your Auction Results</h2>' +
+        '<div class="stats">' +
+        'Won <span class="won">' + wonItems.length + '</span> items | ' +
+        'Lost <span class="lost">' + lostItems.length + '</span> items | ' +
+        'Pots covered: <span class="' + (missingPots.length > 0 ? 'gap' : 'won') + '">' +
+        coveredPots.size + '/8</span>' +
+        (missingPots.length > 0 ? ' — <span class="gap">Missing: ' +
+            missingPots.map(function(p){return p.name;}).join(', ') + '</span>' : ' — Full coverage!') +
+        '</div>';
+
+    var grid = document.getElementById('resultsGrid');
+    grid.innerHTML = '';
+    POTS.forEach(function(pot) {
+        var hasCoverage = coveredPots.has(pot.id);
+        var card = document.createElement('div');
+        card.className = 'result-pot ' + (hasCoverage ? 'covered' : 'missing');
+        var itemsHtml = pot.items.map(function(item) {
+            var winners = getTopN(item.id, pot.winnersPerItem);
+            var myBid = bids[item.id] || 0;
+            if (myBid > 0 && winners.indexOf(teamName) >= 0) {
+                return '<div class="result-item won"><span>' + item.id + ': ' + item.name + '</span><span class="badge">\u2705 WON</span></div>';
+            } else if (myBid > 0) {
+                return '<div class="result-item lost"><span>' + item.id + ': ' + item.name + '</span><span class="badge">\u274C LOST</span></div>';
+            } else {
+                return '<div class="result-item no-bid"><span>' + item.id + ': ' + item.name + '</span><span class="badge">No bid</span></div>';
+            }
+        }).join('');
+
+        card.innerHTML =
+            '<div class="result-pot-header">' +
+            '<h3>' + pot.name + '</h3>' +
+            '<span class="coverage-badge">' + (hasCoverage ? '\u2713 Covered' : '\u2717 Gap') + '</span>' +
+            '</div>' +
+            '<div class="result-items">' + itemsHtml + '</div>';
+        grid.appendChild(card);
+    });
+}
+
+// =============================================
+// POLL BIDS
+// =============================================
+
 function pollAndSync() {
     var script = document.createElement('script');
     var cb = 'cb_' + Date.now();
@@ -370,258 +778,18 @@ function pollAndSync() {
     document.body.appendChild(script);
 }
 
-// --- RENDER POTS ---
-function renderPots() {
-    const grid = document.getElementById('potsGrid');
-    grid.innerHTML = '';
-    POTS.forEach(pot => {
-        const wLabel = 'Top ' + pot.winnersPerItem + ' win';
-        const card = document.createElement('div');
-        card.className = 'pot-card';
-        card.innerHTML = `
-            <div class="pot-header">
-                <h3>${pot.name}</h3>
-                <div class="pot-meta">
-                    <span>${pot.items.length} items</span>
-                    <span class="winners-badge">${wLabel}</span>
-                </div>
-            </div>
-            <div class="pot-items">
-                ${pot.items.map(item => `
-                    <div class="item-row" id="item-${item.id}">
-                        <span class="item-id">${item.id}</span>
-                        <div class="item-info">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-desc">${item.desc}</div>
-                        </div>
-                        <div class="item-status">
-                            <span id="high-${item.id}">\u2014</span>
-                        </div>
-                        <input type="number" class="bid-input" id="bid-${item.id}"
-                            min="0" max="100" placeholder="0"
-                            data-item="${item.id}"
-                            onchange="updateBid(this)" oninput="updateBid(this)">
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-// --- BID MANAGEMENT ---
-function updateBid(input) {
-    if (frozen) return;
-    const id = input.dataset.item;
-    const val = parseInt(input.value) || 0;
-    if (val > 0) { bids[id] = val; input.classList.add('has-value'); }
-    else { delete bids[id]; input.classList.remove('has-value'); }
-    updateStats();
-    updateAllStatuses();
-}
-
-function updateStats() {
-    const used = Object.values(bids).reduce((s,v) => s+v, 0);
-    const count = Object.keys(bids).length;
-    const pots = new Set();
-    POTS.forEach(pot => pot.items.forEach(item => { if (bids[item.id]) pots.add(pot.id); }));
-    const usedEl = document.getElementById('pointsUsed');
-    usedEl.textContent = used;
-    usedEl.className = used > BUDGET ? 'over' : '';
-    document.getElementById('itemCount').textContent = count;
-    document.getElementById('potsCovered').textContent = pots.size;
-    document.getElementById('submitBtn').disabled = used > BUDGET;
-    document.getElementById('finalBtn').disabled = used > BUDGET || used === 0;
-}
-
-function getTopN(itemId, n) {
-    if (!allBids[itemId]) return [];
-    return Object.entries(allBids[itemId])
-        .sort((a,b) => b[1] - a[1])
-        .slice(0, n)
-        .map(e => e[0]);
-}
-
-function getHighBid(itemId) {
-    if (!allBids[itemId]) return 0;
-    return Math.max(...Object.values(allBids[itemId]), 0);
-}
-
-function updateAllStatuses() {
-    POTS.forEach(pot => pot.items.forEach(item => {
-        const row = document.getElementById('item-' + item.id);
-        const highEl = document.getElementById('high-' + item.id);
-        if (!row) return;
-        const myBid = bids[item.id] || 0;
-        const high = getHighBid(item.id);
-        const winners = getTopN(item.id, pot.winnersPerItem);
-        highEl.innerHTML = high > 0 ? '<span class="high">' + high + '</span>' : '\u2014';
-        row.classList.remove('has-bid','winning','outbid');
-        if (myBid > 0) {
-            row.classList.add('has-bid');
-            if (winners.includes(teamName)) row.classList.add('winning');
-            else row.classList.add('outbid');
-        }
-    }));
-}
-
-// --- TIMER ---
-function startTimer() {
-    timerInterval = setInterval(function() {
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            if (!frozen) { doSubmit(); freeze(); }
-            return;
-        }
-        timeLeft--;
-        var m = Math.floor(timeLeft / 60);
-        var s = timeLeft % 60;
-        var el = document.getElementById('timer');
-        el.textContent = m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
-        if (timeLeft < 120) el.classList.add('warning');
-    }, 1000);
-}
-
-// --- SUBMIT ---
-function submitBids() {
-    if (frozen) return;
-    var btn = document.getElementById('submitBtn');
-    btn.textContent = 'Saving...';
-    doSubmit();
-    setTimeout(function() { btn.textContent = 'Update Bids'; poll(); }, 2000);
-}
-
-function finalSubmit() {
-    if (frozen) return;
-    var used = Object.values(bids).reduce(function(s,v){return s+v;}, 0);
-    if (used > BUDGET) { alert('Over budget!'); return; }
-    if (used === 0) { alert('Place at least one bid.'); return; }
-    if (!confirm('Lock in your final bids? You will NOT be able to change them.')) return;
-    doSubmit();
-    freeze();
-}
-
-function freeze() {
-    frozen = true;
-    document.getElementById('mainContent').classList.add('frozen');
-    document.getElementById('timer').textContent = 'LOCKED';
-    document.getElementById('timer').classList.add('warning');
-}
-
-function doSubmit() {
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = API;
-    form.target = 'submitFrame';
-    function addField(name, val) {
-        var inp = document.createElement('input');
-        inp.type = 'hidden'; inp.name = name; inp.value = val;
-        form.appendChild(inp);
-    }
-    addField('action', 'submitBids');
-    addField('teamName', teamName);
-    addField('bids', JSON.stringify(bids));
-    var iframe = document.getElementById('submitFrame');
-    if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'submitFrame'; iframe.name = 'submitFrame';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-    }
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-}
-
-// --- RESULTS VIEW ---
-function showResults() {
-    document.getElementById('biddingView').classList.add('hidden');
-    document.getElementById('resultsView').classList.add('active');
-    document.getElementById('resultsBtn').style.display = 'none';
-    document.getElementById('backBtn').style.display = 'inline-block';
-    renderResults();
-}
-
-function showBidding() {
-    document.getElementById('biddingView').classList.remove('hidden');
-    document.getElementById('resultsView').classList.remove('active');
-    document.getElementById('resultsBtn').style.display = 'inline-block';
-    document.getElementById('backBtn').style.display = 'none';
-}
-
-function renderResults() {
-    var wonItems = [];
-    var lostItems = [];
-    var coveredPots = new Set();
-
-    POTS.forEach(function(pot) {
-        pot.items.forEach(function(item) {
-            var winners = getTopN(item.id, pot.winnersPerItem);
-            if (bids[item.id] && winners.includes(teamName)) {
-                wonItems.push(item.id);
-                coveredPots.add(pot.id);
-            } else if (bids[item.id]) {
-                lostItems.push(item.id);
-            }
-        });
-    });
-
-    var missingPots = POTS.filter(function(p) { return !coveredPots.has(p.id); });
-
-    document.getElementById('resultsSummary').innerHTML =
-        '<h2>Your Auction Results</h2>' +
-        '<div class="stats">' +
-        'Won <span class="won">' + wonItems.length + '</span> items | ' +
-        'Lost <span class="lost">' + lostItems.length + '</span> items | ' +
-        'Pots covered: <span class="' + (missingPots.length > 0 ? 'gap' : 'won') + '">' +
-        coveredPots.size + '/8</span>' +
-        (missingPots.length > 0 ? ' — <span class="gap">Missing: ' +
-            missingPots.map(function(p){return p.name;}).join(', ') + '</span>' : ' — Full coverage!') +
-        '</div>';
-
-    var grid = document.getElementById('resultsGrid');
-    grid.innerHTML = '';
-    POTS.forEach(function(pot) {
-        var hasCoverage = coveredPots.has(pot.id);
-        var card = document.createElement('div');
-        card.className = 'result-pot ' + (hasCoverage ? 'covered' : 'missing');
-        var itemsHtml = pot.items.map(function(item) {
-            var winners = getTopN(item.id, pot.winnersPerItem);
-            var myBid = bids[item.id] || 0;
-            if (myBid > 0 && winners.includes(teamName)) {
-                return '<div class="result-item won"><span>' + item.id + ': ' + item.name + '</span><span class="badge">\u2705 WON</span></div>';
-            } else if (myBid > 0) {
-                return '<div class="result-item lost"><span>' + item.id + ': ' + item.name + '</span><span class="badge">\u274C LOST</span></div>';
-            } else {
-                return '<div class="result-item no-bid"><span>' + item.id + ': ' + item.name + '</span><span class="badge">No bid</span></div>';
-            }
-        }).join('');
-
-        card.innerHTML =
-            '<div class="result-pot-header">' +
-            '<h3>' + pot.name + '</h3>' +
-            '<span class="coverage-badge">' + (hasCoverage ? '\u2713 Covered' : '\u2717 Gap') + '</span>' +
-            '</div>' +
-            '<div class="result-items">' + itemsHtml + '</div>';
-        grid.appendChild(card);
-    });
-}
-
-// --- POLL ---
 function poll() {
     var script = document.createElement('script');
     var cb = 'cb_' + Date.now();
     window[cb] = function(data) {
         if (data && data.bids) {
             allBids = data.bids;
-            // Sync: if a teammate submitted different bids, update local state
             if (!frozen) {
                 POTS.forEach(function(pot) {
                     pot.items.forEach(function(item) {
                         var serverBid = (allBids[item.id] && allBids[item.id][teamName]) || 0;
                         var localBid = bids[item.id] || 0;
                         var inp = document.getElementById('bid-' + item.id);
-                        // Only overwrite if local hasn't been touched (input not focused)
                         if (serverBid !== localBid && inp && document.activeElement !== inp) {
                             if (serverBid > 0) {
                                 bids[item.id] = serverBid;
@@ -650,11 +818,16 @@ function poll() {
 
 function setStatus(ok) {
     var el = document.getElementById('status');
-    el.textContent = ok ? 'Connected' : 'Offline';
-    el.className = 'status ' + (ok ? 'ok' : 'err');
+    if (el) {
+        el.textContent = ok ? 'Connected' : 'Offline';
+        el.className = 'status ' + (ok ? 'ok' : 'err');
+    }
 }
 
-// --- KEYBOARD NAV ---
+// =============================================
+// KEYBOARD NAV
+// =============================================
+
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && e.target.classList.contains('bid-input')) {
         var inputs = Array.from(document.querySelectorAll('.bid-input'));
@@ -662,6 +835,22 @@ document.addEventListener('keydown', function(e) {
         if (idx < inputs.length - 1) inputs[idx + 1].focus();
     }
 });
+
+// =============================================
+// INIT — start polling state immediately (even before login)
+// =============================================
+
+// Poll state right away so we know if auction is already running
+pollState();
+
+// Poll state every 2 seconds, bids every 3 seconds (if joined)
+setInterval(pollState, 2000);
+setInterval(function() {
+    if (hasJoined && auctionState !== 'waiting') poll();
+}, 3000);
+
+// Update timer display every second
+setInterval(updateTimerDisplay, 1000);
 </script>
 </body>
 </html>
